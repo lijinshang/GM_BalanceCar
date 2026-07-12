@@ -1,0 +1,225 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:37
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\i2c.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EWFC1.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\i2c.c" -D
+#        USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\i2c.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\i2c.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\i2c.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * @file    i2c.c
+      5            * @brief   This file provides code for the configuration
+      6            *          of the I2C instances.
+      7            ******************************************************************************
+      8            * @attention
+      9            *
+     10            * Copyright (c) 2025 STMicroelectronics.
+     11            * All rights reserved.
+     12            *
+     13            * This software is licensed under terms that can be found in the LICENSE file
+     14            * in the root directory of this software component.
+     15            * If no LICENSE file comes with this software, it is provided AS-IS.
+     16            *
+     17            ******************************************************************************
+     18            */
+     19          /* USER CODE END Header */
+     20          /* Includes ------------------------------------------------------------------*/
+     21          #include "i2c.h"
+     22          
+     23          /* USER CODE BEGIN 0 */
+     24          
+     25          /* USER CODE END 0 */
+     26          
+     27          I2C_HandleTypeDef hi2c1;
+     28          
+     29          /* I2C1 init function */
+     30          void MX_I2C1_Init(void)
+     31          {
+     32          
+     33            /* USER CODE BEGIN I2C1_Init 0 */
+     34          
+     35            /* USER CODE END I2C1_Init 0 */
+     36          
+     37            /* USER CODE BEGIN I2C1_Init 1 */
+     38          
+     39            /* USER CODE END I2C1_Init 1 */
+     40            hi2c1.Instance = I2C1;
+     41            hi2c1.Init.ClockSpeed = 100000;
+     42            hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+     43            hi2c1.Init.OwnAddress1 = 0;
+     44            hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+     45            hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+     46            hi2c1.Init.OwnAddress2 = 0;
+     47            hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+     48            hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+     49            if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+     50            {
+     51              Error_Handler();
+     52            }
+     53            /* USER CODE BEGIN I2C1_Init 2 */
+     54          
+     55            /* USER CODE END I2C1_Init 2 */
+     56          
+     57          }
+     58          
+     59          void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
+     60          {
+     61          
+     62            GPIO_InitTypeDef GPIO_InitStruct = {0};
+     63            if(i2cHandle->Instance==I2C1)
+     64            {
+     65            /* USER CODE BEGIN I2C1_MspInit 0 */
+     66          
+     67            /* USER CODE END I2C1_MspInit 0 */
+     68          
+     69              __HAL_RCC_GPIOB_CLK_ENABLE();
+     70              /**I2C1 GPIO Configuration
+     71              PB6     ------> I2C1_SCL
+     72              PB7     ------> I2C1_SDA
+     73              */
+     74              GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
+     75              GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+     76              GPIO_InitStruct.Pull = GPIO_NOPULL;
+     77              GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+     78              GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
+     79              HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+     80          
+     81              /* I2C1 clock enable */
+     82              __HAL_RCC_I2C1_CLK_ENABLE();
+     83            /* USER CODE BEGIN I2C1_MspInit 1 */
+     84          
+     85            /* USER CODE END I2C1_MspInit 1 */
+     86            }
+     87          }
+     88          
+     89          void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
+     90          {
+     91          
+     92            if(i2cHandle->Instance==I2C1)
+     93            {
+     94            /* USER CODE BEGIN I2C1_MspDeInit 0 */
+     95          
+     96            /* USER CODE END I2C1_MspDeInit 0 */
+     97              /* Peripheral clock disable */
+     98              __HAL_RCC_I2C1_CLK_DISABLE();
+     99          
+    100              /**I2C1 GPIO Configuration
+    101              PB6     ------> I2C1_SCL
+    102              PB7     ------> I2C1_SDA
+    103              */
+    104              HAL_GPIO_DeInit(GPIOB, GPIO_PIN_6);
+    105          
+    106              HAL_GPIO_DeInit(GPIOB, GPIO_PIN_7);
+    107          
+    108            /* USER CODE BEGIN I2C1_MspDeInit 1 */
+    109          
+    110            /* USER CODE END I2C1_MspDeInit 1 */
+    111            }
+    112          }
+    113          
+    114          /* USER CODE BEGIN 1 */
+    115          void I2C1_WriteByte(unsigned char dev_addr, unsigned char mem_addr, unsigned char *buf, unsigned char len)
+    116          {
+    117          	HAL_I2C_Mem_Write(&hi2c1, dev_addr, mem_addr, I2C_MEMADD_SIZE_8BIT, buf, len, 100);
+    118          }
+    119          
+    120          void I2C1_ReadByte(unsigned char dev_addr, unsigned char mem_addr, unsigned char *buf, unsigned char len)
+    121          {
+    122          	HAL_I2C_Mem_Read(&hi2c1, dev_addr, mem_addr, I2C_MEMADD_SIZE_8BIT, buf, len, 100);
+    123          }
+    124          /* USER CODE END 1 */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   HAL_I2C_MspDeInit
+         0   -> HAL_GPIO_DeInit
+         8   -> HAL_GPIO_DeInit
+      32   HAL_I2C_MspInit
+        32   -> HAL_GPIO_Init
+        32   -> __aeabi_memclr4
+      24   I2C1_ReadByte
+        24   -> HAL_I2C_Mem_Read
+      24   I2C1_WriteByte
+        24   -> HAL_I2C_Mem_Write
+       8   MX_I2C1_Init
+         0   -> Error_Handler
+         8   -> HAL_I2C_Init
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable5
+       4  ??DataTable5_1
+       4  ??DataTable5_2
+       4  ??DataTable5_3
+       4  ??DataTable5_4
+       4  ??DataTable5_5
+      20  ?_0
+      44  HAL_I2C_MspDeInit
+     100  HAL_I2C_MspInit
+      24  I2C1_ReadByte
+      24  I2C1_WriteByte
+      52  MX_I2C1_Init
+      84  hi2c1
+
+ 
+  84 bytes in section .bss
+  20 bytes in section .rodata
+ 268 bytes in section .text
+ 
+ 268 bytes of CODE  memory
+  20 bytes of CONST memory
+  84 bytes of DATA  memory
+
+Errors: none
+Warnings: none

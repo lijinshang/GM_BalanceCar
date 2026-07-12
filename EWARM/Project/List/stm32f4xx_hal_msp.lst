@@ -1,0 +1,158 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:41
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\stm32f4xx_hal_msp.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW1EDF.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\stm32f4xx_hal_msp.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\stm32f4xx_hal_msp.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\stm32f4xx_hal_msp.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\stm32f4xx_hal_msp.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * @file         stm32f4xx_hal_msp.c
+      5            * @brief        This file provides code for the MSP Initialization
+      6            *               and de-Initialization codes.
+      7            ******************************************************************************
+      8            * @attention
+      9            *
+     10            * Copyright (c) 2025 STMicroelectronics.
+     11            * All rights reserved.
+     12            *
+     13            * This software is licensed under terms that can be found in the LICENSE file
+     14            * in the root directory of this software component.
+     15            * If no LICENSE file comes with this software, it is provided AS-IS.
+     16            *
+     17            ******************************************************************************
+     18            */
+     19          /* USER CODE END Header */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "main.h"
+     23          /* USER CODE BEGIN Includes */
+     24          
+     25          /* USER CODE END Includes */
+     26          
+     27          /* Private typedef -----------------------------------------------------------*/
+     28          /* USER CODE BEGIN TD */
+     29          
+     30          /* USER CODE END TD */
+     31          
+     32          /* Private define ------------------------------------------------------------*/
+     33          /* USER CODE BEGIN Define */
+     34          
+     35          /* USER CODE END Define */
+     36          
+     37          /* Private macro -------------------------------------------------------------*/
+     38          /* USER CODE BEGIN Macro */
+     39          
+     40          /* USER CODE END Macro */
+     41          
+     42          /* Private variables ---------------------------------------------------------*/
+     43          /* USER CODE BEGIN PV */
+     44          
+     45          /* USER CODE END PV */
+     46          
+     47          /* Private function prototypes -----------------------------------------------*/
+     48          /* USER CODE BEGIN PFP */
+     49          
+     50          /* USER CODE END PFP */
+     51          
+     52          /* External functions --------------------------------------------------------*/
+     53          /* USER CODE BEGIN ExternalFunctions */
+     54          
+     55          /* USER CODE END ExternalFunctions */
+     56          
+     57          /* USER CODE BEGIN 0 */
+     58          
+     59          /* USER CODE END 0 */
+     60          /**
+     61            * Initializes the Global MSP.
+     62            */
+     63          void HAL_MspInit(void)
+     64          {
+     65          
+     66            /* USER CODE BEGIN MspInit 0 */
+     67          
+     68            /* USER CODE END MspInit 0 */
+     69          
+     70            __HAL_RCC_SYSCFG_CLK_ENABLE();
+     71            __HAL_RCC_PWR_CLK_ENABLE();
+     72          
+     73            /* System interrupt init*/
+     74            /* PendSV_IRQn interrupt configuration */
+     75            HAL_NVIC_SetPriority(PendSV_IRQn, 15, 0);
+     76          
+     77            /* USER CODE BEGIN MspInit 1 */
+     78          
+     79            /* USER CODE END MspInit 1 */
+     80          }
+     81          
+     82          /* USER CODE BEGIN 1 */
+     83          
+     84          /* USER CODE END 1 */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   HAL_MspInit
+         0   -> HAL_NVIC_SetPriority
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      68  HAL_MspInit
+
+ 
+ 68 bytes in section .text
+ 
+ 68 bytes of CODE memory
+
+Errors: none
+Warnings: none

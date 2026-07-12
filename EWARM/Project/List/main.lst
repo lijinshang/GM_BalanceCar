@@ -1,0 +1,391 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:38
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\main.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW1060.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\main.c" -D
+#        USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\main.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\main.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\main.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * @file           : main.c
+      5            * @brief          : Main program body
+      6            ******************************************************************************
+      7            * @attention
+      8            *
+      9            * Copyright (c) 2025 STMicroelectronics.
+     10            * All rights reserved.
+     11            *
+     12            * This software is licensed under terms that can be found in the LICENSE file
+     13            * in the root directory of this software component.
+     14            * If no LICENSE file comes with this software, it is provided AS-IS.
+     15            *
+     16            ******************************************************************************
+     17            */
+     18          /* USER CODE END Header */
+     19          /* Includes ------------------------------------------------------------------*/
+     20          #include "main.h"
+     21          #include "cmsis_os.h"
+     22          #include "adc.h"
+     23          #include "dma.h"
+     24          #include "i2c.h"
+     25          #include "spi.h"
+     26          #include "tim.h"
+     27          #include "usart.h"
+     28          #include "gpio.h"
+     29          
+     30          /* Private includes ----------------------------------------------------------*/
+     31          /* USER CODE BEGIN Includes */
+     32          #include "TinyFOC_hal.h"
+     33          #include "mpu6xxx.h"
+     34          
+     35          /* USER CODE END Includes */
+     36          
+     37          /* Private typedef -----------------------------------------------------------*/
+     38          /* USER CODE BEGIN PTD */
+     39          
+     40          /* USER CODE END PTD */
+     41          
+     42          /* Private define ------------------------------------------------------------*/
+     43          /* USER CODE BEGIN PD */
+     44          
+     45          /* USER CODE END PD */
+     46          
+     47          /* Private macro -------------------------------------------------------------*/
+     48          /* USER CODE BEGIN PM */
+     49          
+     50          /* USER CODE END PM */
+     51          
+     52          /* Private variables ---------------------------------------------------------*/
+     53          
+     54          /* USER CODE BEGIN PV */
+     55          
+     56          /* USER CODE END PV */
+     57          
+     58          /* Private function prototypes -----------------------------------------------*/
+     59          void SystemClock_Config(void);
+     60          void MX_FREERTOS_Init(void);
+     61          /* USER CODE BEGIN PFP */
+     62          
+     63          /* USER CODE END PFP */
+     64          
+     65          /* Private user code ---------------------------------------------------------*/
+     66          /* USER CODE BEGIN 0 */
+     67          
+     68          /* USER CODE END 0 */
+     69          
+     70          /**
+     71            * @brief  The application entry point.
+     72            * @retval int
+     73            */
+     74          int main(void)
+     75          {
+     76          
+     77            /* USER CODE BEGIN 1 */
+     78          
+     79            /* USER CODE END 1 */
+     80          
+     81            /* MCU Configuration--------------------------------------------------------*/
+     82          
+     83            /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+     84            HAL_Init();
+     85          
+     86            /* USER CODE BEGIN Init */
+     87          
+     88            /* USER CODE END Init */
+     89          
+     90            /* Configure the system clock */
+     91            SystemClock_Config();
+     92          
+     93            /* USER CODE BEGIN SysInit */
+     94          
+     95            /* USER CODE END SysInit */
+     96          
+     97            /* Initialize all configured peripherals */
+     98            MX_GPIO_Init();
+     99            MX_DMA_Init();
+    100            MX_ADC1_Init();
+    101            MX_I2C1_Init();
+    102            MX_SPI1_Init();
+    103            MX_TIM1_Init();
+    104            MX_TIM2_Init();
+    105            MX_TIM3_Init();
+    106            MX_TIM10_Init();
+    107            MX_USART6_UART_Init();
+    108            MX_SPI2_Init();
+    109            MX_TIM11_Init();
+    110            /* USER CODE BEGIN 2 */
+    111          	HAL_Delay(100);//等待I2C初始化
+    112          
+    113          	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+    114          	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+    115          	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+    116          
+    117          	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+    118          	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+    119          	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+    120          
+    121          //	Motor_init();
+    122            
+    123            /* USER CODE END 2 */
+    124          
+    125            /* Call init function for freertos objects (in cmsis_os2.c) */
+    126            MX_FREERTOS_Init();
+    127          
+    128            /* Start scheduler */
+    129            osKernelStart();
+    130          
+    131            /* We should never get here as control is now taken by the scheduler */
+    132          
+    133            /* Infinite loop */
+    134            /* USER CODE BEGIN WHILE */
+    135            while (1)
+    136            {
+    137              /* USER CODE END WHILE */
+    138          
+    139              /* USER CODE BEGIN 3 */
+    140            }
+    141            /* USER CODE END 3 */
+    142          }
+    143          
+    144          /**
+    145            * @brief System Clock Configuration
+    146            * @retval None
+    147            */
+    148          void SystemClock_Config(void)
+    149          {
+    150            RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    151            RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    152          
+    153            /** Configure the main internal regulator output voltage
+    154            */
+    155            __HAL_RCC_PWR_CLK_ENABLE();
+    156            __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+    157          
+    158            /** Initializes the RCC Oscillators according to the specified parameters
+    159            * in the RCC_OscInitTypeDef structure.
+    160            */
+    161            RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    162            RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    163            RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    164            RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    165            RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+    166            RCC_OscInitStruct.PLL.PLLM = 8;
+    167            RCC_OscInitStruct.PLL.PLLN = 84;
+    168            RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    169            RCC_OscInitStruct.PLL.PLLQ = 4;
+    170            if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    171            {
+    172              Error_Handler();
+    173            }
+    174          
+    175            /** Initializes the CPU, AHB and APB buses clocks
+    176            */
+    177            RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+    178                                        |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    179            RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    180            RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    181            RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    182            RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    183          
+    184            if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+    185            {
+    186              Error_Handler();
+    187            }
+    188          }
+    189          
+    190          /* USER CODE BEGIN 4 */
+    191          /**
+    192            * @brief  Period elapsed callback in non blocking mode
+    193            * @note   This function is called  when TIM6 interrupt took place, inside
+    194            * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+    195            * a global variable "uwTick" used as application time base.
+    196            * @param  htim : TIM handle
+    197            * @retval None
+    198            */
+    199          void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+    200          {
+    201            /* USER CODE BEGIN Callback 0 */
+    202          	static uint32_t n_1ms = 0;
+    203          	if(htim == &htim10)
+    204          	{//1ms
+    205          		n_1ms++;
+    206          		
+    207          		//1ms调用
+    208          		//获取电角度
+    209          		TinyFOC_GetElectronicAngle(&TinyFOC1);
+    210          		TinyFOC_GetElectronicAngle(&TinyFOC2);
+    211          
+    212          		//FOC计算
+    213          		TinyFOC_Calculate(&TinyFOC1, TinyFOC1.torque_target);
+    214          		TinyFOC_Calculate(&TinyFOC2, TinyFOC2.torque_target);
+    215          
+    216          		//计算转速
+    217          		TinyFOC_GetSpeed(&TinyFOC1);
+    218          		TinyFOC_GetSpeed(&TinyFOC2);
+    219          		
+    220          		//电机控制
+    221          		TinyFOC_MotorControl(&TinyFOC1);
+    222          		TinyFOC_MotorControl(&TinyFOC2);
+    223          
+    224          		
+    225          		if(n_1ms%10==0)
+    226          		{
+    227          
+    228          
+    229          		}
+    230          		if(n_1ms%100==0)
+    231          		{
+    232          		}
+    233          	}
+    234          
+    235            /* USER CODE END Callback 0 */
+    236          
+    237          }
+    238          /* USER CODE END 4 */
+    239          
+    240          /**
+    241            * @brief  This function is executed in case of error occurrence.
+    242            * @retval None
+    243            */
+    244          void Error_Handler(void)
+    245          {
+    246            /* USER CODE BEGIN Error_Handler_Debug */
+    247            /* User can add his own implementation to report the HAL error return state */
+    248            __disable_irq();
+    249            while (1)
+    250            {
+    251            }
+    252            /* USER CODE END Error_Handler_Debug */
+    253          }
+    254          
+    255          #ifdef  USE_FULL_ASSERT
+    256          /**
+    257            * @brief  Reports the name of the source file and the source line number
+    258            *         where the assert_param error has occurred.
+    259            * @param  file: pointer to the source file name
+    260            * @param  line: assert_param error line source number
+    261            * @retval None
+    262            */
+    263          void assert_failed(uint8_t *file, uint32_t line)
+    264          {
+    265            /* USER CODE BEGIN 6 */
+    266            /* User can add his own implementation to report the file name and line number,
+    267               ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+    268            /* USER CODE END 6 */
+    269          }
+    270          #endif /* USE_FULL_ASSERT */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   Error_Handler
+      16   HAL_TIM_PeriodElapsedCallback
+        16   -> TinyFOC_Calculate
+        16   -> TinyFOC_GetElectronicAngle
+        16   -> TinyFOC_GetSpeed
+         0   -> TinyFOC_MotorControl
+        16   -> TinyFOC_MotorControl
+      80   SystemClock_Config
+        80   -> Error_Handler
+        80   -> HAL_RCC_ClockConfig
+        80   -> HAL_RCC_OscConfig
+        80   -> __aeabi_memclr4
+       8   main
+         8   -> HAL_Delay
+         8   -> HAL_Init
+         8   -> HAL_TIM_PWM_Start
+         8   -> MX_ADC1_Init
+         8   -> MX_DMA_Init
+         8   -> MX_FREERTOS_Init
+         8   -> MX_GPIO_Init
+         8   -> MX_I2C1_Init
+         8   -> MX_SPI1_Init
+         8   -> MX_SPI2_Init
+         8   -> MX_TIM10_Init
+         8   -> MX_TIM11_Init
+         8   -> MX_TIM1_Init
+         8   -> MX_TIM2_Init
+         8   -> MX_TIM3_Init
+         8   -> MX_USART6_UART_Init
+         8   -> SystemClock_Config
+         8   -> osKernelStart
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable3
+       4  ??DataTable3_1
+       4  ??DataTable3_2
+       4  ??DataTable3_3
+       4  ??DataTable3_4
+       4  ??DataTable3_5
+       4  ??DataTable3_6
+       4  ??DataTable3_7
+      48  ?_0
+      20  ?_1
+       4  Error_Handler
+      82  HAL_TIM_PeriodElapsedCallback
+     164  SystemClock_Config
+     126  main
+       4  n_1ms
+
+ 
+   4 bytes in section .bss
+  68 bytes in section .rodata
+ 408 bytes in section .text
+ 
+ 408 bytes of CODE  memory
+  68 bytes of CONST memory
+   4 bytes of DATA  memory
+
+Errors: none
+Warnings: none

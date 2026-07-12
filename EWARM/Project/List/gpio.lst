@@ -1,0 +1,196 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:36
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\gpio.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW908.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\gpio.c" -D
+#        USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\gpio.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\gpio.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\gpio.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * @file    gpio.c
+      5            * @brief   This file provides code for the configuration
+      6            *          of all used GPIO pins.
+      7            ******************************************************************************
+      8            * @attention
+      9            *
+     10            * Copyright (c) 2025 STMicroelectronics.
+     11            * All rights reserved.
+     12            *
+     13            * This software is licensed under terms that can be found in the LICENSE file
+     14            * in the root directory of this software component.
+     15            * If no LICENSE file comes with this software, it is provided AS-IS.
+     16            *
+     17            ******************************************************************************
+     18            */
+     19          /* USER CODE END Header */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "gpio.h"
+     23          
+     24          /* USER CODE BEGIN 0 */
+     25          
+     26          /* USER CODE END 0 */
+     27          
+     28          /*----------------------------------------------------------------------------*/
+     29          /* Configure GPIO                                                             */
+     30          /*----------------------------------------------------------------------------*/
+     31          /* USER CODE BEGIN 1 */
+     32          
+     33          /* USER CODE END 1 */
+     34          
+     35          /** Configure pins as
+     36                  * Analog
+     37                  * Input
+     38                  * Output
+     39                  * EVENT_OUT
+     40                  * EXTI
+     41          */
+     42          void MX_GPIO_Init(void)
+     43          {
+     44          
+     45            GPIO_InitTypeDef GPIO_InitStruct = {0};
+     46          
+     47            /* GPIO Ports Clock Enable */
+     48            __HAL_RCC_GPIOH_CLK_ENABLE();
+     49            __HAL_RCC_GPIOC_CLK_ENABLE();
+     50            __HAL_RCC_GPIOA_CLK_ENABLE();
+     51            __HAL_RCC_GPIOB_CLK_ENABLE();
+     52          
+     53            /*Configure GPIO pin Output Level */
+     54            HAL_GPIO_WritePin(POWER_CON_GPIO_Port, POWER_CON_Pin, GPIO_PIN_RESET);
+     55          
+     56            /*Configure GPIO pin Output Level */
+     57            HAL_GPIO_WritePin(GPIOC, PS2_CMD_Pin|PS2_CS_Pin|PS2_CLK_Pin|M1_CS_Pin
+     58                                    |M2_CS_Pin|M3_CS_Pin, GPIO_PIN_RESET);
+     59          
+     60            /*Configure GPIO pin Output Level */
+     61            HAL_GPIO_WritePin(GPIOB, BUZZ_Pin|OLED_CS_Pin|OLED_DC_Pin, GPIO_PIN_RESET);
+     62          
+     63            /*Configure GPIO pin Output Level */
+     64            HAL_GPIO_WritePin(LED_RUN_GPIO_Port, LED_RUN_Pin, GPIO_PIN_RESET);
+     65          
+     66            /*Configure GPIO pin : PtPin */
+     67            GPIO_InitStruct.Pin = POWER_KEY_Pin;
+     68            GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+     69            GPIO_InitStruct.Pull = GPIO_NOPULL;
+     70            HAL_GPIO_Init(POWER_KEY_GPIO_Port, &GPIO_InitStruct);
+     71          
+     72            /*Configure GPIO pin : PtPin */
+     73            GPIO_InitStruct.Pin = POWER_CON_Pin;
+     74            GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+     75            GPIO_InitStruct.Pull = GPIO_NOPULL;
+     76            GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+     77            HAL_GPIO_Init(POWER_CON_GPIO_Port, &GPIO_InitStruct);
+     78          
+     79            /*Configure GPIO pin : PtPin */
+     80            GPIO_InitStruct.Pin = PS2_DATA_Pin;
+     81            GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+     82            GPIO_InitStruct.Pull = GPIO_NOPULL;
+     83            HAL_GPIO_Init(PS2_DATA_GPIO_Port, &GPIO_InitStruct);
+     84          
+     85            /*Configure GPIO pins : PCPin PCPin PCPin PCPin
+     86                                     PCPin PCPin */
+     87            GPIO_InitStruct.Pin = PS2_CMD_Pin|PS2_CS_Pin|PS2_CLK_Pin|M1_CS_Pin
+     88                                    |M2_CS_Pin|M3_CS_Pin;
+     89            GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+     90            GPIO_InitStruct.Pull = GPIO_NOPULL;
+     91            GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+     92            HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+     93          
+     94            /*Configure GPIO pins : PBPin PBPin PBPin */
+     95            GPIO_InitStruct.Pin = BUZZ_Pin|OLED_CS_Pin|OLED_DC_Pin;
+     96            GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+     97            GPIO_InitStruct.Pull = GPIO_NOPULL;
+     98            GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+     99            HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    100          
+    101            /*Configure GPIO pin : PtPin */
+    102            GPIO_InitStruct.Pin = LED_RUN_Pin;
+    103            GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    104            GPIO_InitStruct.Pull = GPIO_NOPULL;
+    105            GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    106            HAL_GPIO_Init(LED_RUN_GPIO_Port, &GPIO_InitStruct);
+    107          
+    108          }
+    109          
+    110          /* USER CODE BEGIN 2 */
+    111          
+    112          /* USER CODE END 2 */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      56   MX_GPIO_Init
+        56   -> HAL_GPIO_Init
+        56   -> HAL_GPIO_WritePin
+        56   -> __aeabi_memclr4
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+       4  ??DataTable1_2
+       4  ??DataTable1_3
+       4  ??DataTable1_4
+      20  ?_0
+     294  MX_GPIO_Init
+
+ 
+  20 bytes in section .rodata
+ 314 bytes in section .text
+ 
+ 314 bytes of CODE  memory
+  20 bytes of CONST memory
+
+Errors: none
+Warnings: none

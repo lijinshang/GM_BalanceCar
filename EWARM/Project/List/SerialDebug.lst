@@ -1,0 +1,521 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:39
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\SerialDebug.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW1529.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\SerialDebug.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\SerialDebug.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\SerialDebug.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\SerialDebug.c
+      1          /*********************************************************************************************
+      2          //                     GM SerialDebug串口调试软件 by 李锦上&#xA;
+      3          // * 功能简介 &#xA;
+      4          // * =======================================&#xA;
+      5          // * 1.串口基本功能 &#xA;
+      6          // * 支持文本模式、HEX模式发送和接收； &#xA;
+      7          // * 支持自动搜索可用串口； &#xA;
+      8          // * 串口打开时可设置波特率； &#xA;
+      9          // * 支持自动发送； &#xA;
+     10          // * 支持保存接收数据、打开发送数据； &#xA;
+     11          // * 支持HEX模式发送时自动格式化输入数据：自动去除多余的空格、自动拆分少输入的空格、自动补0；&#xA;
+     12          // * 例如输入：A0 b  c D0E  &#xA;
+     13          // * 格式化后：A0 0B 0C D0 0E &#xA;
+     14          // * 选择：暂停接收后可选择接收区数据，否则不能选择 &#xA;
+     15          // * 自动发送：发送周期小于10ms按10ms处理 &#xA;
+     16          // * 智能滚动：鼠标在接受区内不自动滚动到底部，否则收到新数据自动滚动至底部方便观察 &#xA;
+     17          // * 分割帧：在HEX模式接收时自动尝试分割帧 &#xA;&#xA;
+     18          // * 自适应：所有窗体控件自适应大小
+     19          // * =======================================&#xA;
+     20          // * 2.数据示波功能：当连接的串口收到指定格式的数据时会将数据转成波形显示在数据示波窗口。&#xA;
+     21          // * 通信协议：支持CH0-CH9十个通道。&#xA;
+     22          // * 帧格式例：A5 5A 0B A0 A4 70 45 41 A4 70 45 C1 AA  &#xA;
+     23          // * Byte0-1 ：A5 5A 帧头 &#xA;
+     24          // * Byte2   ：0B 本帧包含的字节数，除了起始字节外 &#xA;
+     25          // * Byte3   ：A0 功能码 数据示波 &#xA;
+     26          // * Byte4-7 ：A4 70 45 41 (float) CH0通道的数据:12.34 &#xA;
+     27          // * Byte8-11：A4 70 45 C1 (float) CH1通道的数据:-12.34 &#xA;
+     28          // * Byte12  ：AA 帧尾 &#xA;
+     29          // * 点击右侧CH0-CH9通道按钮，可隐藏或显示曲线。隐藏曲线后只显示通道号，显示曲线时会显示当前通道的数据 &#xA;
+     30          // * 每屏点数：每屏固定显示点数，超过此值如在自动滚屏状态会自动滚屏；在鼠标拖拽查看时此项无效 &#xA;
+     31          // * 自动滚屏：自动跟踪最新数据并向左滚动屏幕 &#xA;
+     32          // * 暂停：暂停接收帧数据并停止更新屏幕 &#xA;
+     33          // * 保存图像：将屏幕的数据保存成PNG图片格式 &#xA;
+     34          // * 保存数据：将收到的波形数据保存成.CSV格式以便用Excel分析 &#xA;
+     35          // * 缩放：鼠标放在图表区滚动滚轮可缩放x轴；按住Ctrl+滚轮可同步缩放x轴和y轴；按住Ctrl+鼠标拖动可选区放大 &#xA;
+     36          // * 自测试：可以自动生成CH0-CH9十通道正弦数据供测试用 &#xA; &#xA;
+     37          // * =======================================&#xA;
+     38          // * 3.参数调试功能：当勾选启用参数调试时，串口发送部分由参数调试窗口接管，此时串口发送区内容无效。&#xA;
+     39          // * LED通信协议：&#xA;
+     40          // * 帧格式例：A5 5A 0B B0 01 00 FF 00 00 00 00 00 AA &#xA;
+     41          // * Byte0-1 ：A5 5A 帧头 &#xA;
+     42          // * Byte2   ：0B 本帧包含的字节数，除了起始字节外 &#xA;
+     43          // * Byte3   ：B0 功能码 LED状态 &#xA;
+     44          // * Byte4   ：01 LED0的状态:非0点亮 &#xA;
+     45          // * Byte5   ：00 LED1的状态:为0熄灭 &#xA;
+     46          // * Byte6   ：FF LED2的状态:非0点亮 &#xA;
+     47          // * Byte7   ：00 LED3的状态:为0熄灭 &#xA;
+     48          // * Byte8   ：00 LED4的状态:为0熄灭 &#xA;
+     49          // * Byte9   ：00 LED5的状态:为0熄灭 &#xA;
+     50          // * Byte10  ：00 LED6的状态:为0熄灭 &#xA;
+     51          // * Byte11  ：00 LED7的状态:为0熄灭 &#xA;
+     52          // * Byte12  ：AA 帧尾 &#xA; &#xA;
+     53          // * 滑块通信协议：&#xA;
+     54          // * 帧格式例：A5 5A 23 C0 A4 70 45 41 B8 1E 63 42     &#xA;
+     55          // *           00 00 00 00 00 00 00 00 00 00 00 00     &#xA;
+     56          // *           00 00 00 00 00 00 00 00 00 00 00 00 AA  &#xA;
+     57          // * Byte0-1 ：A5 5A 帧头 &#xA;
+     58          // * Byte2   ：23 本帧包含的字节数，除了起始字节外 &#xA;
+     59          // * Byte3   ：C0 功能码 参数调试-滑块 &#xA;
+     60          // * Byte4-7 ：A4 70 45 41 (float) 滑块0的数据:12.34 &#xA;
+     61          // * Byte8-11：B8 1E 63 42 (float) 滑块1的数据:56.78 &#xA;
+     62          // * Byte12-35：滑块2-滑块7的数据 &#xA;
+     63          // * Byte36  ：AA 帧尾 &#xA; &#xA;
+     64          // * 按钮通信协议：&#xA;
+     65          // * 帧格式例：A5 5A 05 D0 00 01 AA  &#xA;
+     66          // * Byte0-1 ：A5 5A 帧头 &#xA;
+     67          // * Byte2   ：05 本帧包含的字节数，除了起始字节外 &#xA;
+     68          // * Byte3   ：D0 功能码 参数调试-按钮 &#xA;
+     69          // * Byte4   ：00 按钮数据高字节:备用 &#xA;
+     70          // * Byte5   ：01 按钮数据低字节:按钮0按下 (0x80:按钮7按下) &#xA;
+     71          // * Byte6   ：AA 帧尾 &#xA; &#xA;
+     72          // * 保存配置：保存界面设置 &#xA; &#xA;
+     73          // * =======================================&#xA;
+     74          // * 软件更新地址：http://pan.baidu.com/s/1kVF8OdD &#xA;
+     75          // * 本人读书读的少，加之时间匆忙，难免有bug，还请谅解，如您发现bug,还请不吝指正 &#xA;
+     76          // * E-mail:lijinshang@126.com &#xA;
+     77          **********************************************************************************************/
+     78          
+     79          #include "math.h"
+     80          #include "usart.h"
+     81          
+     82          #include "SerialDebug.h"
+     83          
+     84          
+     85          
+     86          //模式选择
+     87          //#define MODEL		SIN_WAVE	//正弦波
+     88          //#define MODEL		SELF_DEBUG	//自我调试
+     89          #define MODEL		NORMAL		//正常使用
+     90          
+     91          float Parameter[8] = {0};		//滑块0-7 滑块值会更新到这里
+     92          unsigned int Button = 0;		//按钮0-7 按钮状态会更新到这里
+     93          unsigned char LED_State[8] = {0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF};		//LED0-7 LED状态会更新到上位机
+     94          
+     95          unsigned char SerialDebugBuffer[45] = {0};		//SerialDebug数据缓冲
+     96          
+     97          
+     98          unsigned char count_ch0 = 100 / 10*0;
+     99          unsigned char count_ch1 = 100 / 10*1;
+    100          unsigned char count_ch2 = 100 / 10*2;
+    101          unsigned char count_ch3 = 100 / 10*3;
+    102          unsigned char count_ch4 = 100 / 10*4;
+    103          unsigned char count_ch5 = 100 / 10*5;
+    104          unsigned char count_ch6 = 100 / 10*6;
+    105          unsigned char count_ch7 = 100 / 10*7;
+    106          unsigned char count_ch8 = 100 / 10*8;
+    107          unsigned char count_ch9 = 100 / 10*9;
+    108          
+    109          float SinTab[100] = {//正弦表
+    110          			0.00000, 0.06276, 0.12527, 0.18729, 0.24857, 0.30887, 0.36795, 0.42558, 0.48153, 0.53558,
+    111          			0.58753, 0.63715, 0.68427, 0.72869, 0.77023, 0.80874, 0.84405, 0.87605, 0.90458, 0.92955,
+    112          			0.95086, 0.96842, 0.98216, 0.99202, 0.99798, 1.00000, 0.99808, 0.99222, 0.98245, 0.96881,
+    113          			0.95135, 0.93014, 0.90526, 0.87681, 0.84491, 0.80967, 0.77124, 0.72977, 0.68543, 0.63838,
+    114          			0.58882, 0.53693, 0.48293, 0.42702, 0.36943, 0.31038, 0.25011, 0.18885, 0.12685, 0.06435,
+    115          			0.00159, -0.06117, -0.12369, -0.18572, -0.24702, -0.30735, -0.36647, -0.42414, -0.48013, -0.53424,
+    116          			-0.58624, -0.63593, -0.68311, -0.72759, -0.76921, -0.80780, -0.84320, -0.87528, -0.90390, -0.92897,
+    117          			-0.95037, -0.96802, -0.98185, -0.99182, -0.99788, -1.00000, -0.99818, -0.99242, -0.98275, -0.96921,
+    118          			-0.95184, -0.93072, -0.90594, -0.87758, -0.84576, -0.81061, -0.77226, -0.73086, -0.68659, -0.63961,
+    119          			-0.59010, -0.53827, -0.48432, -0.42846, -0.37091, -0.31189, -0.25165, -0.19042, -0.12843, -0.06594
+    120          		};
+    121          
+    122          
+    123          union
+    124          {
+    125          	unsigned char floatByte[4];
+    126          	float floatValue;
+    127          }FloatUnion;
+    128          
+    129          /*********************************************************************************************
+    130          函数名：void Float2Byte(float *FloatValue, unsigned char *Byte, unsigned char Subscript)
+    131          参  数：FloatValue:float值
+    132          		Byte:数组
+    133          		Subscript:指定从数组第几个元素开始写入
+    134          返回值：无
+    135          结  果：将float数据转成4字节数据并存入指定地址
+    136          **********************************************************************************************/
+    137          void Float2Byte(float *FloatValue, unsigned char *Byte, unsigned char Subscript)
+    138          {
+    139          	FloatUnion.floatValue = (float)2;
+    140          	
+    141          	if(FloatUnion.floatByte[0] == 0)
+    142          	{//小端模式
+    143          		FloatUnion.floatValue = *FloatValue;
+    144          
+    145          		Byte[Subscript]     = FloatUnion.floatByte[0];
+    146          		Byte[Subscript + 1] = FloatUnion.floatByte[1];
+    147          		Byte[Subscript + 2] = FloatUnion.floatByte[2];
+    148          		Byte[Subscript + 3] = FloatUnion.floatByte[3];
+    149          	}
+    150          	else
+    151          	{//大端模式
+    152          		FloatUnion.floatValue = *FloatValue;
+    153          
+    154          		Byte[Subscript]     = FloatUnion.floatByte[3];
+    155          		Byte[Subscript + 1] = FloatUnion.floatByte[2];
+    156          		Byte[Subscript + 2] = FloatUnion.floatByte[1];
+    157          		Byte[Subscript + 3] = FloatUnion.floatByte[0];
+    158          	}
+    159          }
+    160          
+    161          /*********************************************************************************************
+    162          函数名：void Byte2Float(unsigned char *Byte, unsigned char Subscript, float *FloatValue)
+    163          参  数：Byte:数组
+    164          		Subscript:指定从数组第几个元素开始写入
+    165          		FloatValue:float值
+    166          返回值：无
+    167          结  果：从指定地址将4字节数据转成float数据
+    168          **********************************************************************************************/
+    169          void Byte2Float(unsigned char *Byte, unsigned char Subscript, float *FloatValue)
+    170          {
+    171          	FloatUnion.floatByte[0] = Byte[Subscript];
+    172          	FloatUnion.floatByte[1] = Byte[Subscript + 1];
+    173          	FloatUnion.floatByte[2] = Byte[Subscript + 2];
+    174          	FloatUnion.floatByte[3] = Byte[Subscript + 3];
+    175          
+    176          	*FloatValue = FloatUnion.floatValue;
+    177          }
+    178          
+    179          /*********************************************************************************************
+    180          函数名：void SerialDebug_SetChannelData(unsigned char Channel, float Data)
+    181          参  数：Channel:选择通道(1-10)
+    182          		Data:通道数据
+    183          返回值：无
+    184          结  果：将待发送通道的浮点数据写入发送缓冲区
+    185          **********************************************************************************************/
+    186          void SerialDebug_SetChannelData(unsigned char Channel, float Data)
+    187          {
+    188          	if (Channel > 9) return ;
+    189          
+    190          	Float2Byte(&Data, SerialDebugBuffer, 4 + Channel * 4);
+    191          }
+    192          
+    193          /*********************************************************************************************
+    194          函数名：unsigned char SerialDebug_DataWaveform_Generate(unsigned char Channel_Number)
+    195          参  数：Channel_Number:需要发送的通道个数
+    196          返回值：返回发送缓冲区数据个数
+    197          		返回0表示帧格式生成失败
+    198          结  果：SerialDebug数据示波:生成帧数据
+    199          **********************************************************************************************/
+    200          unsigned char SerialDebug_DataWaveform_Generate(unsigned char Channel_Number)
+    201          {
+    202          	if (Channel_Number > 10) return 0;		//通道个数大于9，直接跳出
+    203          
+    204          	SerialDebugBuffer[0] = 0xA5;		//帧头
+    205          	SerialDebugBuffer[1] = 0x5A;		//帧头
+    206          	SerialDebugBuffer[2] = 3 + Channel_Number * 4;		//本帧包含的字节数，除了起始字节外
+    207          	SerialDebugBuffer[3] = 0xA0;		//功能码 数据示波
+    208          	SerialDebugBuffer[4 + Channel_Number * 4] = 0xAA;		//帧尾
+    209          
+    210          	return 4 + Channel_Number * 4 + 1;
+    211          }
+    212          
+    213          /*********************************************************************************************
+    214          函数名：unsigned char SerialDebug_ParameterDebug_LED_Generate(void)
+    215          参  数：无
+    216          返回值：返回发送缓冲区数据个数
+    217          结  果：SerialDebug参数调试-LED:生成帧数据
+    218          **********************************************************************************************/
+    219          unsigned char SerialDebug_ParameterDebug_LED_Generate(void)
+    220          {
+    221          	SerialDebugBuffer[0] = 0xA5;		//帧头
+    222          	SerialDebugBuffer[1] = 0x5A;		//帧头
+    223          	SerialDebugBuffer[2] = 0x0B;		//本帧包含的字节数，除了起始字节外
+    224          	SerialDebugBuffer[3] = 0xB0;		//功能码 参数调试:LED
+    225          
+    226          	SerialDebugBuffer[4] = LED_State[0];
+    227          	SerialDebugBuffer[5] = LED_State[1];
+    228          	SerialDebugBuffer[6] = LED_State[2];
+    229          	SerialDebugBuffer[7] = LED_State[3];
+    230          	SerialDebugBuffer[8] = LED_State[4];
+    231          	SerialDebugBuffer[9] = LED_State[5];
+    232          	SerialDebugBuffer[10] = LED_State[6];
+    233          	SerialDebugBuffer[11] = LED_State[7];
+    234          
+    235          	SerialDebugBuffer[12] = 0xAA;		//帧尾
+    236          
+    237          	return 13;
+    238          }
+    239          
+    240          
+    241          /*以下是SerialDebug接口函数*/
+    242          /*********************************************************************************************
+    243          函数名：void SerialDebug_DataWaveform(void)
+    244          参  数：无
+    245          返回值：无
+    246          结  果：SerialDebug数据示波:向数据示波窗体添加一组数据
+    247          备  注：推荐100ms调用一次
+    248          **********************************************************************************************/
+    249          void SerialDebug_DataWaveform(void)
+    250          {
+    251          	unsigned char i;          
+    252          	unsigned char Send_Count; 
+    253          	
+    254          	//制造数据
+    255          #if MODEL == SIN_WAVE		//SIN波形
+    256          	SerialDebug_SetChannelData(0, SinTab[count_ch0]);
+    257          	SerialDebug_SetChannelData(1, SinTab[count_ch1]);
+    258          	SerialDebug_SetChannelData(2, SinTab[count_ch2]);
+    259          	SerialDebug_SetChannelData(3, SinTab[count_ch3]);
+    260          	SerialDebug_SetChannelData(4, SinTab[count_ch4]);
+    261          	SerialDebug_SetChannelData(5, SinTab[count_ch5]);
+    262          	SerialDebug_SetChannelData(6, SinTab[count_ch6]);
+    263          	SerialDebug_SetChannelData(7, SinTab[count_ch7]);
+    264          	SerialDebug_SetChannelData(8, SinTab[count_ch8]);
+    265          	SerialDebug_SetChannelData(9, SinTab[count_ch9]);
+    266          	
+    267          	count_ch0++;
+    268          	count_ch1++;
+    269          	count_ch2++;
+    270          	count_ch3++;
+    271          	count_ch4++;
+    272          	count_ch5++;
+    273          	count_ch6++;
+    274          	count_ch7++;
+    275          	count_ch8++;
+    276          	count_ch9++;
+    277          
+    278          	if (count_ch0 > 99) count_ch0 = 0;
+    279          	if (count_ch1 > 99) count_ch1 = 0;
+    280          	if (count_ch2 > 99) count_ch2 = 0;
+    281          	if (count_ch3 > 99) count_ch3 = 0;
+    282          	if (count_ch4 > 99) count_ch4 = 0;
+    283          	if (count_ch5 > 99) count_ch5 = 0;
+    284          	if (count_ch6 > 99) count_ch6 = 0;
+    285          	if (count_ch7 > 99) count_ch7 = 0;
+    286          	if (count_ch8 > 99) count_ch8 = 0;
+    287          	if (count_ch9 > 99) count_ch9 = 0;
+    288          
+    289          #endif
+    290          #if MODEL == SELF_DEBUG		//自我调试
+    291          	SerialDebug_SetChannelData(0, Parameter[0]);
+    292          	SerialDebug_SetChannelData(1, Parameter[1]);
+    293          	SerialDebug_SetChannelData(2, Parameter[2]);
+    294          	SerialDebug_SetChannelData(3, Parameter[3]);
+    295          	SerialDebug_SetChannelData(4, Parameter[4]);
+    296          	SerialDebug_SetChannelData(5, Parameter[5]);
+    297          	SerialDebug_SetChannelData(6, Parameter[6]);
+    298          	SerialDebug_SetChannelData(7, Parameter[7]);
+    299          #endif
+    300          
+    301          #if MODEL == NORMAL		//正常使用
+    302          	SerialDebug_SetChannelData(0, 0);		//通道0
+    303          	SerialDebug_SetChannelData(1, 0);		//通道1
+    304          	SerialDebug_SetChannelData(2, 0);		//通道2
+    305          	SerialDebug_SetChannelData(3, 0);		//通道3
+    306          	SerialDebug_SetChannelData(4, 0);		//通道4
+    307          	SerialDebug_SetChannelData(5, 0);		//通道5
+    308          	SerialDebug_SetChannelData(6, 0);		//通道6
+    309          	SerialDebug_SetChannelData(7, 0);		//通道7
+    310          	SerialDebug_SetChannelData(8, 0);		//通道8
+    311          	SerialDebug_SetChannelData(9, 0);		//通道9
+    312          #endif
+    313          
+    314          	//制造数据结束
+    315          
+    316          	Send_Count = SerialDebug_DataWaveform_Generate(10);		//获取10通道数据帧
+    317          
+    318          	COM6.TX_Len = 0;
+    319          	for ( i = 0 ; i < Send_Count; i++)		//添加到串口发送缓冲区
+    320          	{//这里需要改成自己的串口发送函数
+    321          //		USART_SendData(USART1, SerialDebugBuffer[i]);
+    322          //		while(USART_GetFlagStatus(USART1,USART_FLAG_TC)==RESET); 
+    323          		COM6_TX_Buffer[COM6.TX_Len++] = SerialDebugBuffer[i];
+    324          	}
+    325          	
+    326          //	USART_SendData(USART1, TX1_Buffer[COM6.TX_Cnt++]);
+    327          //	USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+    328          //	if(HAL_UART_Transmit_IT(&huart3,(uint8_t*)COM6_TX_Buffer,COM6.TX_Len)!=HAL_OK)
+    329          //		Error_Handler();
+    330          	USART_SendData_DMA(&huart6,COM6_TX_Buffer,COM6.TX_Len);
+    331          
+    332          }
+    333          
+    334          /*********************************************************************************************
+    335          函数名：void SerialDebug_ParameterDebug_LED(void)
+    336          参  数：无
+    337          返回值：无
+    338          结  果：SerialDebug参数调试-LED
+    339          备  注：更新LED状态时调用，与SerialDebug_DataWaveform()函数调用间隔至少50ms以上
+    340          **********************************************************************************************/
+    341          void SerialDebug_ParameterDebug_LED(void)
+    342          {
+    343          	unsigned char i;         
+    344          	unsigned char Send_Count;
+    345          	
+    346          	//更新LED状态
+    347          	LED_State[0] = ~LED_State[0];
+    348          	LED_State[1] = ~LED_State[1];
+    349          	LED_State[2] = ~LED_State[2];
+    350          	LED_State[3] = ~LED_State[3];
+    351          	LED_State[4] = ~LED_State[4];
+    352          	LED_State[5] = ~LED_State[5];
+    353          	LED_State[6] = ~LED_State[6];
+    354          	LED_State[7] = ~LED_State[7];
+    355          
+    356          	Send_Count = SerialDebug_ParameterDebug_LED_Generate();		//获取LED数据帧
+    357          
+    358          	COM6.TX_Len = 0;
+    359          	for ( i = 0 ; i < Send_Count; i++)		//添加到串口发送缓冲区
+    360          	{//这里需要改成自己的串口发送函数
+    361          //		USART_SendData(USART1, SerialDebugBuffer[i]);
+    362          //		while(USART_GetFlagStatus(USART1,USART_FLAG_TC)==RESET); 
+    363          		COM6_TX_Buffer[COM6.TX_Len++] = SerialDebugBuffer[i];
+    364          	}
+    365          
+    366          //	USART_SendData(USART1, TX1_Buffer[COM6.TX_Cnt++]);
+    367          //	USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+    368          //	if(HAL_UART_Transmit_IT(&huart3,(uint8_t*)COM6_TX_Buffer,COM6.TX_Len)!=HAL_OK)
+    369          //		Error_Handler();
+    370          	
+    371          	USART_SendData_DMA(&huart6,COM6_TX_Buffer,COM6.TX_Len);
+    372          }
+    373          
+    374          /*********************************************************************************************
+    375          函数名：void SerialDebug_DataWaveform(void)
+    376          参  数：无
+    377          返回值：无
+    378          结  果：SerialDebug参数调试-滑块
+    379          备  注：帧结束时调用，即连续5ms以上没收到数据时调用
+    380          **********************************************************************************************/
+    381          void SerialDebug_ParameterDebug(void)
+    382          {
+    383          	unsigned char i;
+    384          
+    385          	if (COM6_RX_Buffer[0] == 0xA5 && COM6_RX_Buffer[1] == 0x5A && COM6_RX_Buffer[COM6_RX_Buffer[2] + 1] == 0xAA)
+    386          	{
+    387          		switch (COM6_RX_Buffer[3])
+    388          		{
+    389          		case 0xC0:		//滑块
+    390          			for (i = 0;i < (COM6_RX_Buffer[2] - 2) / 4;i++)
+    391          				Byte2Float(COM6_RX_Buffer, i*4 + 4, &Parameter[i]);
+    392          			break;
+    393          		case 0xD0:		//按钮
+    394          			Button = (unsigned int)COM6_RX_Buffer[4] << 8 | COM6_RX_Buffer[5];
+    395          			break;
+    396          		default: break;
+    397          		}
+    398          	}
+    399          }
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   Byte2Float
+       4   Float2Byte
+      16   SerialDebug_DataWaveform
+        16   -> SerialDebug_DataWaveform_Generate
+        16   -> SerialDebug_SetChannelData
+         0   -> USART_SendData_DMA
+       0   SerialDebug_DataWaveform_Generate
+      16   SerialDebug_ParameterDebug
+        16   -> Byte2Float
+      16   SerialDebug_ParameterDebug_LED
+        16   -> SerialDebug_ParameterDebug_LED_Generate
+         0   -> USART_SendData_DMA
+       0   SerialDebug_ParameterDebug_LED_Generate
+       8   SerialDebug_SetChannelData
+         8   -> Float2Byte
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable7
+       4  ??DataTable7_1
+       4  ??DataTable7_2
+       4  ??DataTable7_3
+       4  ??DataTable7_4
+       4  ??DataTable7_5
+       4  ??DataTable7_6
+       4  ??DataTable7_7
+       4  ??DataTable7_8
+      36  Button
+          Parameter
+      26  Byte2Float
+      58  Float2Byte
+       4  FloatUnion
+       8  LED_State
+      48  SerialDebugBuffer
+     154  SerialDebug_DataWaveform
+      44  SerialDebug_DataWaveform_Generate
+     100  SerialDebug_ParameterDebug
+     102  SerialDebug_ParameterDebug_LED
+      60  SerialDebug_ParameterDebug_LED_Generate
+      30  SerialDebug_SetChannelData
+     400  SinTab
+       1  count_ch0
+       1  count_ch1
+       1  count_ch2
+       1  count_ch3
+       1  count_ch4
+       1  count_ch5
+       1  count_ch6
+       1  count_ch7
+       1  count_ch8
+       1  count_ch9
+
+ 
+  89 bytes in section .bss
+ 417 bytes in section .data
+ 610 bytes in section .text
+ 
+ 610 bytes of CODE memory
+ 506 bytes of DATA memory
+
+Errors: none
+Warnings: none

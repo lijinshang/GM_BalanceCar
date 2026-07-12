@@ -1,0 +1,392 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:36
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\adc.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW8F2.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\adc.c" -D
+#        USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\adc.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\adc.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\adc.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * @file    adc.c
+      5            * @brief   This file provides code for the configuration
+      6            *          of the ADC instances.
+      7            ******************************************************************************
+      8            * @attention
+      9            *
+     10            * Copyright (c) 2025 STMicroelectronics.
+     11            * All rights reserved.
+     12            *
+     13            * This software is licensed under terms that can be found in the LICENSE file
+     14            * in the root directory of this software component.
+     15            * If no LICENSE file comes with this software, it is provided AS-IS.
+     16            *
+     17            ******************************************************************************
+     18            */
+     19          /* USER CODE END Header */
+     20          /* Includes ------------------------------------------------------------------*/
+     21          #include "adc.h"
+     22          
+     23          /* USER CODE BEGIN 0 */
+     24          uint16_t uhADCxConvertedValue[ADC_SAMP_NUM][ADC_SAMP_CH_MAX];
+     25          uint16_t ADC_Result[ADC_SAMP_CH_MAX];
+     26          
+     27          const float* BatteryCapacity = NULL;
+     28          const float BatteryCapacityTab[6]={3.48,3.62,3.73,3.76,3.85,3.97};//满电4.12
+     29          const float BatteryChrgCapacityTab[6]={3.48,3.62,3.73,3.76,3.85,3.97};//
+     30          uint16_t adc_samples[SAMPLE_LENGTH]; // 存储ADC采样值的数组
+     31          float battery_voltage;
+     32          
+     33          /* USER CODE END 0 */
+     34          
+     35          ADC_HandleTypeDef hadc1;
+     36          DMA_HandleTypeDef hdma_adc1;
+     37          
+     38          /* ADC1 init function */
+     39          void MX_ADC1_Init(void)
+     40          {
+     41          
+     42            /* USER CODE BEGIN ADC1_Init 0 */
+     43          
+     44            /* USER CODE END ADC1_Init 0 */
+     45          
+     46            ADC_ChannelConfTypeDef sConfig = {0};
+     47          
+     48            /* USER CODE BEGIN ADC1_Init 1 */
+     49          
+     50            /* USER CODE END ADC1_Init 1 */
+     51          
+     52            /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+     53            */
+     54            hadc1.Instance = ADC1;
+     55            hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+     56            hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+     57            hadc1.Init.ScanConvMode = ENABLE;
+     58            hadc1.Init.ContinuousConvMode = ENABLE;
+     59            hadc1.Init.DiscontinuousConvMode = DISABLE;
+     60            hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+     61            hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+     62            hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+     63            hadc1.Init.NbrOfConversion = 7;
+     64            hadc1.Init.DMAContinuousRequests = ENABLE;
+     65            hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+     66            if (HAL_ADC_Init(&hadc1) != HAL_OK)
+     67            {
+     68              Error_Handler();
+     69            }
+     70          
+     71            /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+     72            */
+     73            sConfig.Channel = ADC_CHANNEL_3;
+     74            sConfig.Rank = 1;
+     75            sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+     76            if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+     77            {
+     78              Error_Handler();
+     79            }
+     80          
+     81            /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+     82            */
+     83            sConfig.Channel = ADC_CHANNEL_4;
+     84            sConfig.Rank = 2;
+     85            if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+     86            {
+     87              Error_Handler();
+     88            }
+     89          
+     90            /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+     91            */
+     92            sConfig.Channel = ADC_CHANNEL_5;
+     93            sConfig.Rank = 3;
+     94            if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+     95            {
+     96              Error_Handler();
+     97            }
+     98          
+     99            /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+    100            */
+    101            sConfig.Channel = ADC_CHANNEL_6;
+    102            sConfig.Rank = 4;
+    103            if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+    104            {
+    105              Error_Handler();
+    106            }
+    107          
+    108            /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+    109            */
+    110            sConfig.Channel = ADC_CHANNEL_7;
+    111            sConfig.Rank = 5;
+    112            if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+    113            {
+    114              Error_Handler();
+    115            }
+    116          
+    117            /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+    118            */
+    119            sConfig.Channel = ADC_CHANNEL_8;
+    120            sConfig.Rank = 6;
+    121            if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+    122            {
+    123              Error_Handler();
+    124            }
+    125          
+    126            /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+    127            */
+    128            sConfig.Channel = ADC_CHANNEL_9;
+    129            sConfig.Rank = 7;
+    130            if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+    131            {
+    132              Error_Handler();
+    133            }
+    134            /* USER CODE BEGIN ADC1_Init 2 */
+    135          
+    136            /* USER CODE END ADC1_Init 2 */
+    137          
+    138          }
+    139          
+    140          void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
+    141          {
+    142          
+    143            GPIO_InitTypeDef GPIO_InitStruct = {0};
+    144            if(adcHandle->Instance==ADC1)
+    145            {
+    146            /* USER CODE BEGIN ADC1_MspInit 0 */
+    147          
+    148            /* USER CODE END ADC1_MspInit 0 */
+    149              /* ADC1 clock enable */
+    150              __HAL_RCC_ADC1_CLK_ENABLE();
+    151          
+    152              __HAL_RCC_GPIOA_CLK_ENABLE();
+    153              __HAL_RCC_GPIOB_CLK_ENABLE();
+    154              /**ADC1 GPIO Configuration
+    155              PA3     ------> ADC1_IN3
+    156              PA4     ------> ADC1_IN4
+    157              PA5     ------> ADC1_IN5
+    158              PA6     ------> ADC1_IN6
+    159              PA7     ------> ADC1_IN7
+    160              PB0     ------> ADC1_IN8
+    161              PB1     ------> ADC1_IN9
+    162              */
+    163              GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6
+    164                                    |GPIO_PIN_7;
+    165              GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    166              GPIO_InitStruct.Pull = GPIO_NOPULL;
+    167              HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    168          
+    169              GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+    170              GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    171              GPIO_InitStruct.Pull = GPIO_NOPULL;
+    172              HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    173          
+    174              /* ADC1 DMA Init */
+    175              /* ADC1 Init */
+    176              hdma_adc1.Instance = DMA2_Stream0;
+    177              hdma_adc1.Init.Channel = DMA_CHANNEL_0;
+    178              hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    179              hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
+    180              hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
+    181              hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    182              hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    183              hdma_adc1.Init.Mode = DMA_CIRCULAR;
+    184              hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
+    185              hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    186              if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
+    187              {
+    188                Error_Handler();
+    189              }
+    190          
+    191              __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc1);
+    192          
+    193            /* USER CODE BEGIN ADC1_MspInit 1 */
+    194          
+    195            /* USER CODE END ADC1_MspInit 1 */
+    196            }
+    197          }
+    198          
+    199          void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
+    200          {
+    201          
+    202            if(adcHandle->Instance==ADC1)
+    203            {
+    204            /* USER CODE BEGIN ADC1_MspDeInit 0 */
+    205          
+    206            /* USER CODE END ADC1_MspDeInit 0 */
+    207              /* Peripheral clock disable */
+    208              __HAL_RCC_ADC1_CLK_DISABLE();
+    209          
+    210              /**ADC1 GPIO Configuration
+    211              PA3     ------> ADC1_IN3
+    212              PA4     ------> ADC1_IN4
+    213              PA5     ------> ADC1_IN5
+    214              PA6     ------> ADC1_IN6
+    215              PA7     ------> ADC1_IN7
+    216              PB0     ------> ADC1_IN8
+    217              PB1     ------> ADC1_IN9
+    218              */
+    219              HAL_GPIO_DeInit(GPIOA, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6
+    220                                    |GPIO_PIN_7);
+    221          
+    222              HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0|GPIO_PIN_1);
+    223          
+    224              /* ADC1 DMA DeInit */
+    225              HAL_DMA_DeInit(adcHandle->DMA_Handle);
+    226            /* USER CODE BEGIN ADC1_MspDeInit 1 */
+    227          
+    228            /* USER CODE END ADC1_MspDeInit 1 */
+    229            }
+    230          }
+    231          
+    232          /* USER CODE BEGIN 1 */
+    233          /**************************************************************************************************
+    234          函数：ADC结果滤波函数
+    235          参数：无
+    236          返回：无
+    237          **************************************************************************************************/
+    238          void ADC_ResultFilter(void)
+    239          {
+    240          	uint32_t sum = 0;
+    241          	uint16_t i, j;
+    242          
+    243          	for (i = 0;i < ADC_SAMP_CH_MAX;i++)
+    244          	{
+    245          		sum = 0;
+    246          		for (j = 0;j < ADC_SAMP_NUM;j++)
+    247          		{
+    248          			sum += uhADCxConvertedValue[j][i];
+    249          		}
+    250          		ADC_Result[i] = sum / ADC_SAMP_NUM;
+    251          	}
+    252          }
+    253          
+    254          
+    255          void Get_Battery_Voltage(void)
+    256          {
+    257              uint16_t filtered_adc_value;
+    258          
+    259          
+    260              filtered_adc_value = ADC_Result[0];
+    261          
+    262              // 计算电池电压
+    263              battery_voltage = (float)filtered_adc_value * 3.3 / 4096.0 * (R1 + R2) / R2;
+    264          
+    265          
+    266          }
+    267          /* USER CODE END 1 */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   ADC_ResultFilter
+       8   Get_Battery_Voltage
+         8   -> __aeabi_d2f
+         8   -> __aeabi_ddiv
+         8   -> __aeabi_dmul
+         8   -> __aeabi_f2d
+       8   HAL_ADC_MspDeInit
+         0   -> HAL_DMA_DeInit
+         8   -> HAL_GPIO_DeInit
+      40   HAL_ADC_MspInit
+        40   -> Error_Handler
+        40   -> HAL_DMA_Init
+        40   -> HAL_GPIO_Init
+        40   -> __aeabi_memclr4
+      24   MX_ADC1_Init
+        24   -> Error_Handler
+        24   -> HAL_ADC_ConfigChannel
+        24   -> HAL_ADC_Init
+        24   -> __aeabi_memclr4
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable8
+       4  ??DataTable8_1
+       4  ??DataTable8_10
+       4  ??DataTable8_11
+       4  ??DataTable8_12
+       4  ??DataTable8_13
+       4  ??DataTable8_14
+       4  ??DataTable8_2
+       4  ??DataTable8_3
+       4  ??DataTable8_4
+       4  ??DataTable8_5
+       4  ??DataTable8_6
+       4  ??DataTable8_7
+       4  ??DataTable8_8
+       4  ??DataTable8_9
+      16  ?_0
+      20  ?_1
+      32  ADC_Result
+          battery_voltage
+      58  ADC_ResultFilter
+       4  BatteryCapacity
+      24  BatteryCapacityTab
+      24  BatteryChrgCapacityTab
+      64  Get_Battery_Voltage
+      50  HAL_ADC_MspDeInit
+     194  HAL_ADC_MspInit
+     248  MX_ADC1_Init
+      40  adc_samples
+      72  hadc1
+      96  hdma_adc1
+     260  uhADCxConvertedValue
+
+ 
+ 504 bytes in section .bss
+  84 bytes in section .rodata
+ 674 bytes in section .text
+ 
+ 674 bytes of CODE  memory
+  84 bytes of CONST memory
+ 504 bytes of DATA  memory
+
+Errors: none
+Warnings: none

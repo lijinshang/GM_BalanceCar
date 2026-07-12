@@ -1,0 +1,119 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:36
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\filter.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW906.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\filter.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\filter.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\filter.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\filter.c
+      1          /*****************************************************************************
+      2          程序名称：
+      3          程 序 员：李锦上 Email：lijinshang@126.com 
+      4          使用说明：
+      5          修改历史：
+      6          ******************************************************************************/
+      7          #include "TinyFOC_hal.h"
+      8          
+      9          /******************************************************************************
+     10          函数：配置一阶滤波器参数
+     11          参数：*param：滤波器结构体, cutoff_freq：截止频率, sample_freq：采样频率
+     12          返回：无
+     13          ******************************************************************************/
+     14          void filter_coefficient_config(Filter_Structure_t *param, float cutoff_freq, float sample_freq) 
+     15          {
+     16              memset(param, 0, sizeof(Filter_Structure_t));
+     17              
+     18              const float tau = 1.0f / (2 * M_PI * cutoff_freq); // 使用精确的π值
+     19              const float alpha = tau * sample_freq;
+     20              const float denom = 1.0f + alpha;
+     21              
+     22              param->coefficient1 = 1.0f / denom;    // α = 1/(1+τ·fs)
+     23              param->coefficient2 = alpha / denom;   // 1 - α = τ·fs/(1+τ·fs)
+     24          }
+     25          
+     26          /******************************************************************************
+     27          函数：一阶滤波器
+     28          参数：*param：滤波器结构体, value：新值
+     29          返回：滤波值
+     30          ******************************************************************************/
+     31          float filter_update_value(Filter_Structure_t *param, float value) 
+     32          {
+     33              param->current_result = param->coefficient1 * value + param->coefficient2 * param->last_result;
+     34              param->last_result = param->current_result;
+     35              return param->current_result;
+     36          }
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   filter_coefficient_config
+        16   -> __aeabi_d2f
+        16   -> __aeabi_ddiv
+        16   -> __aeabi_dmul
+        16   -> __aeabi_f2d
+        16   -> __aeabi_memset4
+       0   filter_update_value
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable0
+       4  ??DataTable0_1
+       4  ??DataTable0_2
+      94  filter_coefficient_config
+      30  filter_update_value
+
+ 
+ 136 bytes in section .text
+ 
+ 136 bytes of CODE memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,262 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:38
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\Power.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW1100.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\Power.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\Power.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\Power.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\Power.c
+      1          /*****************************************************************************
+      2          系统框架：李锦上 Email：lijinshang@126.com 
+      3          硬件系统：通用
+      4          软件系统：通用
+      5          开发环境：通用
+      6          项目名称：软件开关机管理
+      7          项目适配：
+      8          功能简述：长按电源键开机 长按电源关机
+      9          应用变更：
+     10          修改历史：
+     11          2024-11-26：解决由关机调用emwin导致的复位而再次重启问题
+     12          2023-6-12：调试完成
+     13          2023-6-12：编写完成
+     14          立项时间：2023-6-12
+     15          控制芯片：通用
+     16          ******************************************************************************/
+     17          #include "Power.h"
+     18          //#include "tim.h"
+     19          //#include "GUI.h"
+     20          //#include "UC1701.h"
+     21          
+     22          Power_Type Power;
+     23          
+     24          
+     25          extern void BUZZ(uint16_t ms);
+     26          //extern osTimerId myTimer01Handle;
+     27          
+     28          /******************************************************************************
+     29          函数：获取电源按键状态
+     30          参数：无
+     31          返回：无
+     32          ******************************************************************************/
+     33          uint8_t GetPowerButton()
+     34          {
+     35          	return POWER_KEY_READ;//高电平有效
+     36          }
+     37          
+     38          /******************************************************************************
+     39          函数：电源控制开
+     40          参数：无
+     41          返回：无
+     42          ******************************************************************************/
+     43          void PowerOn(void)
+     44          {
+     45          	POWER_CON_WRITE(1);
+     46          }
+     47          
+     48          /******************************************************************************
+     49          函数：电源控制关
+     50          参数：无
+     51          返回：无
+     52          ******************************************************************************/
+     53          void PowerOff(void)
+     54          {
+     55          	POWER_CON_WRITE(0);
+     56          }
+     57          
+     58          /******************************************************************************
+     59          函数：等待电源键释放
+     60          参数：无
+     61          返回：无
+     62          ******************************************************************************/
+     63          void WaitPowerButtonRelease(void)
+     64          {
+     65          	while(GetPowerButton())
+     66          	{
+     67          //		HAL_IWDG_Refresh(&hiwdg);
+     68          		osDelay(100);
+     69          	}
+     70          }
+     71          
+     72          /******************************************************************************
+     73          函数：清屏
+     74          参数：无
+     75          返回：无
+     76          ******************************************************************************/
+     77          void ClearDisplay(void)
+     78          {
+     79          //	GUI_Clear();
+     80          }
+     81          
+     82          /******************************************************************************
+     83          函数：电源键处理
+     84          参数：无
+     85          返回：无
+     86          ******************************************************************************/
+     87          void PowerButtonHandle(void)
+     88          {
+     89          	if(GetPowerButton())//高电平有效
+     90          	{
+     91          		if(Power.PowerButtonPressCnt < POWER_BUTTON_PRESS_CNT)
+     92          			Power.PowerButtonPressCnt++;
+     93          		else
+     94          		{
+     95          			Power.PowerButtonPressCnt = 0;
+     96          			Power.PowerButtonActive = 1;
+     97          		}
+     98          	}
+     99          	else
+    100          	{
+    101          		Power.PowerButtonPressCnt = 0;
+    102          //		Power.PowerButtonActive = 0;
+    103          	}
+    104          }
+    105          
+    106          /******************************************************************************
+    107          函数：软件开关机处理
+    108          参数：无
+    109          返回：无
+    110          备注：10ms调用一次
+    111          ******************************************************************************/
+    112          void PowerHandle(void)
+    113          {
+    114          	switch(Power.PowerStatus)
+    115          	{
+    116          		case OFF:
+    117          			PowerButtonHandle();
+    118          			if(Power.PowerButtonActive)//有效
+    119          			{//开机
+    120          				PowerOn();
+    121          				Power.PowerStatus = ON;
+    122          				Power.PowerButtonActive = 0;
+    123          				Power.PowerOff = 0;
+    124          				BUZZ(1000);
+    125          //				//开背光
+    126          //				HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
+    127          //				__HAL_TIM_SetCompare(&htim4,TIM_CHANNEL_1,30);
+    128          //				osTimerStart(myTimer01Handle,1000*30);
+    129          				WaitPowerButtonRelease();//等待按键释放
+    130          			}
+    131          			break;
+    132          		case ON:
+    133          			PowerButtonHandle();
+    134          			if(Power.PowerButtonActive)//有效
+    135          			{//关机
+    136          				Power.PowerStatus = OFF;
+    137          				Power.PowerButtonActive = 0;
+    138          				Power.PowerOff = 1;
+    139          				BUZZ(1000);
+    140          				
+    141          				WaitPowerButtonRelease();//等待按键释放
+    142          //				//关背光
+    143          //				__HAL_TIM_SetCompare(&htim4,TIM_CHANNEL_1,0);
+    144          				PowerOff();
+    145          			}
+    146          			break;
+    147          	}
+    148          }
+    149          
+    150          
+    151          
+    152          
+    153          
+    154          
+    155          
+    156          
+    157          
+    158          
+    159          
+    160          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   ClearDisplay
+       0   GetPowerButton
+         0   -> HAL_GPIO_ReadPin
+       8   PowerButtonHandle
+         8   -> GetPowerButton
+       8   PowerHandle
+         8   -> BUZZ
+         8   -> PowerButtonHandle
+         0   -> PowerOff
+         8   -> PowerOn
+         0   -> WaitPowerButtonRelease
+         8   -> WaitPowerButtonRelease
+       0   PowerOff
+         0   -> HAL_GPIO_WritePin
+       0   PowerOn
+         0   -> HAL_GPIO_WritePin
+       8   WaitPowerButtonRelease
+         8   -> GetPowerButton
+         8   -> osDelay
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable4
+       4  ??DataTable4_1
+       2  ClearDisplay
+       8  GetPowerButton
+       8  Power
+      42  PowerButtonHandle
+      92  PowerHandle
+      10  PowerOff
+      10  PowerOn
+      20  WaitPowerButtonRelease
+
+ 
+   8 bytes in section .bss
+ 192 bytes in section .text
+ 
+ 192 bytes of CODE memory
+   8 bytes of DATA memory
+
+Errors: none
+Warnings: none

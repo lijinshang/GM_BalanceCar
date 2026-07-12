@@ -1,0 +1,222 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:38
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\sensor_hal.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW14F9.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\sensor_hal.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\sensor_hal.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\sensor_hal.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\sensor_hal.c
+      1          /*****************************************************************************
+      2          程序名称：传感器接口
+      3          程 序 员：李锦上 Email：lijinshang@126.com 
+      4          使用说明：
+      5          修改历史：
+      6          2025-6-14：修复角度差值未处理过零跳变错误：
+      7          当电机连续旋转跨越0点时（如从359°跳变到0°），直接相减会得到错误的大负值（如0 - 359 = -359），而实际角度变化可能很小
+      8          ******************************************************************************/
+      9          #include "sensor_hal.h"
+     10          #include "TinyFOC.h"
+     11          #include "TinyFOC_hal.h"
+     12          
+     13          /******************************************************************************
+     14          函数：计算浮点数余数
+     15          参数：x：被除数, y：除数
+     16          返回：余数
+     17          ******************************************************************************/
+     18          float my_fmodf(float x, float y)
+     19          {
+     20          	if (y == 0)
+     21          		return 0.0f;
+     22          
+     23          	x = x * 10000; // 将数值放大10000倍，以便处理小数部分
+     24          	y = y * 10000;
+     25          
+     26          	int n = (int)(x / y); // 获取商的整数部分
+     27          	float remainder = x - n * y; // 计算余数
+     28          
+     29          	return remainder / 10000; // 将余数缩小到原来的小数位数
+     30          }
+     31          
+     32          /******************************************************************************
+     33          函数：获取传感器角度
+     34          参数：tinyFOC：FOC结构体
+     35          返回：角度
+     36          ******************************************************************************/
+     37          float TinyFOC_GetSensorAngle(TinyFOC_t *tinyFOC)
+     38          {
+     39          	float angle;
+     40          	getAngleValue(tinyFOC->sensor);
+     41          	angle = tinyFOC->sensor->AngleValue + 180.0;
+     42          
+     43          	return angle;
+     44          }
+     45          
+     46          
+     47          /******************************************************************************
+     48          函数：获取机械角度
+     49          参数：tinyFOC：FOC结构体
+     50          返回：机械角度
+     51          ******************************************************************************/
+     52          float TinyFOC_GetMechanicalAngle(TinyFOC_t *tinyFOC)
+     53          {
+     54          //0-360
+     55          	/* statistical total rotation angle */
+     56          	float angle = TinyFOC_GetSensorAngle(tinyFOC);
+     57          	tinyFOC->total_machine_angle += angle - tinyFOC->last_mechanical_angle;
+     58          
+     59          	tinyFOC->total_machine_angle = my_fmodf((tinyFOC->total_machine_angle), ENCODER_RESO);
+     60          
+     61          	tinyFOC->last_mechanical_angle = angle;
+     62          
+     63          	/* returns the result of subtracting the offGPIO_PIN_SET. */
+     64          	return my_fmodf((tinyFOC->total_machine_angle - tinyFOC->machine_angle_offset), ENCODER_RESO);
+     65          }
+     66          
+     67          /******************************************************************************
+     68          函数：获取电角度
+     69          参数：tinyFOC：FOC结构体
+     70          返回：电角度
+     71          ******************************************************************************/
+     72          float TinyFOC_GetElectronicAngle(TinyFOC_t *tinyFOC)
+     73          {
+     74          	/* read back the mechanical angle directly from the magnetic encoder */
+     75          	float tmp_mechanical_angle = TinyFOC_GetMechanicalAngle(tinyFOC);
+     76          
+     77          	/* calculate and update the mechanical angle and electric angle */
+     78          	tinyFOC->mechanical_angle = (float)tmp_mechanical_angle * MECHANGLE_COEFFICIENT;
+     79          	float electric_angle = my_fmodf(tmp_mechanical_angle, (ENCODER_RESO / POLAR_PAIRS)) * ELECANGLE_COEFFICIENT;
+     80          	tinyFOC->elect_angle = electric_angle;
+     81          	return electric_angle;
+     82          }
+     83          
+     84          
+     85          
+     86          /******************************************************************************
+     87          函数：获取速度
+     88          参数：tinyFOC：FOC结构体
+     89          返回：无
+     90          ******************************************************************************/
+     91          void TinyFOC_GetSpeed(TinyFOC_t *tinyFOC)
+     92          {
+     93              // 1. 获取当前角度并计算差值（处理过零跳变）
+     94              float current_angle = tinyFOC->total_machine_angle;
+     95              float last_angle = tinyFOC->systick_mechanical_angle_last;
+     96              float delta_angle = current_angle - last_angle;
+     97          
+     98              // 处理角度过零跳变（假设10ms内转动不超过半圈）
+     99              if(delta_angle > ENCODER_RESO / 2) {
+    100                  delta_angle -= ENCODER_RESO;  // 正向跨零修正
+    101              } 
+    102              else if(delta_angle < -ENCODER_RESO / 2) {
+    103                  delta_angle += ENCODER_RESO;  // 反向跨零修正
+    104              }
+    105          
+    106              // 2. 计算实际转速（RPM，带符号）
+    107              // 公式：转速 = [角度变化量(圈) / 时间(s)] * 60s/min
+    108              float delta_revs = delta_angle / ENCODER_RESO;  // 转换为圈数
+    109              float rpm = (delta_revs / 0.001f) * 60.0f;       // 1ms = 0.001s
+    110              
+    111              // 3. 可选：添加低通滤波
+    112              float filtered_rpm = filter_update_value(&tinyFOC->speed_filter, rpm);
+    113              
+    114              // 4. 更新状态
+    115              tinyFOC->mechanical_speed = filtered_rpm;
+    116              tinyFOC->systick_mechanical_angle_last = current_angle;
+    117          }
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   TinyFOC_GetElectronicAngle
+        16   -> TinyFOC_GetMechanicalAngle
+        16   -> __aeabi_d2f
+        16   -> __aeabi_dmul
+        16   -> __aeabi_f2d
+        16   -> my_fmodf
+      16   TinyFOC_GetMechanicalAngle
+        16   -> TinyFOC_GetSensorAngle
+         0   -> my_fmodf
+        16   -> my_fmodf
+       8   TinyFOC_GetSensorAngle
+         8   -> getAngleValue
+      16   TinyFOC_GetSpeed
+        16   -> filter_update_value
+       0   my_fmodf
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable4
+       4  ??DataTable4_1
+       4  ??DataTable4_10
+       4  ??DataTable4_11
+       4  ??DataTable4_12
+       4  ??DataTable4_13
+       4  ??DataTable4_2
+       4  ??DataTable4_3
+       4  ??DataTable4_4
+       4  ??DataTable4_5
+       4  ??DataTable4_6
+       4  ??DataTable4_7
+       4  ??DataTable4_8
+       4  ??DataTable4_9
+      86  TinyFOC_GetElectronicAngle
+      82  TinyFOC_GetMechanicalAngle
+      26  TinyFOC_GetSensorAngle
+     112  TinyFOC_GetSpeed
+      54  my_fmodf
+
+ 
+ 416 bytes in section .text
+ 
+ 416 bytes of CODE memory
+
+Errors: none
+Warnings: none

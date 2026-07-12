@@ -1,0 +1,917 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:39
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\STM32_TLE5012B.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW15F7.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\STM32_TLE5012B.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\STM32_TLE5012B.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\STM32_TLE5012B.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\TinyFOC\STM32_TLE5012B.c
+      1          /*****************************************************************************
+      2          程序名称：TLE5012B驱动
+      3          程 序 员：李锦上 Email：lijinshang@126.com 
+      4          使用说明：
+      5          
+      6          hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
+      7          hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+      8          hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+      9          
+     10          tle5012b_1.spi = &hspi1;
+     11          tle5012b_1.cs_gpio_port = GPIOC;
+     12          tle5012b_1.cs_pin = GPIO_PIN_10;
+     13          tle5012b_1.mosi_gpio_port = TLE5012_MOSI_GPIO_Port;
+     14          tle5012b_1.mosi_pin = TLE5012_MOSI_Pin;
+     15          tle5012b_1.sck_gpio_port = TLE5012_SCK_GPIO_Port;
+     16          tle5012b_1.sck_pin = TLE5012_SCK_Pin;
+     17          
+     18          readBlockCRC(&tle5012b_1);//初始化
+     19          getAngleValue(&tle5012b_1);//读角度 -180 - 180 第一次是0
+     20          
+     21          修改历史：
+     22          2025-6-1：测试成功
+     23          2025-6-1：增加多传感器支持
+     24          2025-6-1：移植于STM32_TLE5012库 有改动
+     25          ******************************************************************************/
+     26          #include "STM32_TLE5012B.h"
+     27          
+     28          
+     29          
+     30          
+     31          #ifndef TLE5012_NOT_MODIFY_MOSI_MANUALLY
+     32          
+     33          void TLE5012_SET_MOSI_MODE_AF_PP(void)
+     34          {
+     35          	GPIO_InitTypeDef GPIO_InitStruct = {0};
+     36          	GPIO_InitStruct.Pin			= TLE5012_MOSI_Pin;
+     37          	GPIO_InitStruct.Mode		= GPIO_MODE_AF_PP;
+     38          	GPIO_InitStruct.Pull		= GPIO_NOPULL;
+     39          	GPIO_InitStruct.Speed		= GPIO_SPEED_FREQ_VERY_HIGH;
+     40          	GPIO_InitStruct.Alternate	= TLE5012_MOSI_GPIO_ALTERNATE;
+     41          	HAL_GPIO_Init(TLE5012_MOSI_GPIO_Port, &GPIO_InitStruct);
+     42          }
+     43          
+     44          void TLE5012_SET_MOSI_MODE_INPUT(void)
+     45          {
+     46          	GPIO_InitTypeDef GPIO_InitStruct = {0};
+     47          	GPIO_InitStruct.Pin			= TLE5012_MOSI_Pin;
+     48          	GPIO_InitStruct.Mode		= GPIO_MODE_INPUT;
+     49          	GPIO_InitStruct.Pull		= GPIO_NOPULL;
+     50          	GPIO_InitStruct.Speed		= GPIO_SPEED_FREQ_VERY_HIGH;
+     51          	HAL_GPIO_Init(TLE5012_MOSI_GPIO_Port, &GPIO_InitStruct);
+     52          }
+     53          #endif
+     54          
+     55          // 获取一个16位数的高字节
+     56          uint8_t _getFirstByte(uint16_t twoByteWord)
+     57          {
+     58          	return (uint8_t)(twoByteWord >> 8U);
+     59          }
+     60          
+     61          // 获取一个16位数的低字节
+     62          uint8_t _getSecondByte(uint16_t twoByteWord)
+     63          {
+     64          	return (uint8_t)twoByteWord;
+     65          }
+     66          
+     67          // 计算CRC8校验值
+     68          uint8_t _crc8(uint8_t *data, uint8_t length)
+     69          {
+     70          	uint32_t crc;
+     71          	int16_t i, bit;
+     72          
+     73          	crc = CRC_SEED; // 初始化CRC校验值
+     74          
+     75          	for (i = 0; i < length; i++)
+     76          	{
+     77          		crc ^= data[i];
+     78          
+     79          		for (bit = 0; bit < 8; bit++)
+     80          		{
+     81          			if ((crc & 0x80) != 0)
+     82          			{
+     83          				crc <<= 1;
+     84          				crc ^= CRC_POLYNOMIAL; // 如果最高位是1，则进行异或操作
+     85          			}
+     86          			else
+     87          			{
+     88          				crc <<= 1; // 如果最高位不是1，只进行左移操作
+     89          			}
+     90          		}
+     91          	}
+     92          
+     93          	return (~crc); // 返回取反后的CRC校验值
+     94          }
+     95          
+     96          // 计算CRC校验值的包装函数
+     97          uint8_t _crcCalc(uint8_t *crcData, uint8_t length)
+     98          {
+     99          	return _crc8(crcData, length);
+    100          }
+    101          
+    102          // 触发传感器更新 不能在中断里调用
+    103          void triggerUpdate(TLE5012B_Sensor *sensor)
+    104          {
+    105          	// 将SCK引脚设置为低电平
+    106          	HAL_GPIO_WritePin(sensor->sck_gpio_port, sensor->sck_pin, GPIO_PIN_RESET);
+    107          	// 将MOSI引脚设置为高电平
+    108          	HAL_GPIO_WritePin(sensor->mosi_gpio_port, sensor->mosi_pin, GPIO_PIN_SET);
+    109          	HAL_GPIO_WritePin(sensor->cs_gpio_port, sensor->cs_pin, GPIO_PIN_RESET); // 使能SPI片选
+    110          //	HAL_Delay(1); // 延迟一段时间
+    111          	HAL_GPIO_WritePin(sensor->cs_gpio_port, sensor->cs_pin, GPIO_PIN_SET); // 禁用SPI片选
+    112          }
+    113          
+    114          // 重置安全状态
+    115          void resetSafety(TLE5012B_Sensor *sensor)
+    116          {
+    117          	uint16_t u16RegValue = 0;
+    118          
+    119          //	triggerUpdate(sensor); // 触发更新
+    120          
+    121          	HAL_GPIO_WritePin(sensor->cs_gpio_port, sensor->cs_pin, GPIO_PIN_RESET); // 使能SPI片选
+    122          
+    123          	u16RegValue = READ_STA_CMD; // 设置读取状态命令
+    124          	HAL_SPI_Transmit(sensor->spi, (uint8_t *)(&u16RegValue), sizeof(u16RegValue) / sizeof(uint16_t), 0xFF); // 发送命令
+    125          	u16RegValue = DUMMY; // 设置虚拟值
+    126          	HAL_SPI_Transmit(sensor->spi, (uint8_t *)(&u16RegValue), sizeof(u16RegValue) / sizeof(uint16_t), 0xFF); // 发送虚拟值
+    127          	HAL_SPI_Transmit(sensor->spi, (uint8_t *)(&u16RegValue), sizeof(u16RegValue) / sizeof(uint16_t), 0xFF); // 再次发送虚拟值
+    128          
+    129          	HAL_GPIO_WritePin(sensor->cs_gpio_port, sensor->cs_pin, GPIO_PIN_SET); // 禁用SPI片选
+    130          }
+    131          
+    132          // 检查安全状态和CRC校验
+    133          errorTypes checkSafety(TLE5012B_Sensor *sensor, uint16_t safety, uint16_t command, uint16_t *readreg, uint16_t length)
+    134          {
+    135          	errorTypes errorCheck;
+    136          
+    137          	// 检查系统错误
+    138          	if (!((safety) & SYSTEM_ERROR_MASK))
+    139          	{
+    140          		errorCheck = SYSTEM_ERROR;
+    141          	}
+    142          	// 检查接口访问错误
+    143          	else if (!((safety) & INTERFACE_ERROR_MASK))
+    144          	{
+    145          		errorCheck = INTERFACE_ACCESS_ERROR;
+    146          	}
+    147          	// 检查角度值有效性错误
+    148          	else if (!((safety) & INV_ANGLE_ERROR_MASK))
+    149          	{
+    150          		errorCheck = INVALID_ANGLE_ERROR;
+    151          	}
+    152          	else
+    153          	{
+    154          		// 计算CRC校验值需要的数据长度
+    155          		uint16_t lengthOfTemp = length * 2 + 2;
+    156          		// 定义一个临时数组来存储数据
+    157          		uint8_t temp[CRC_NUM_REGISTERS*2+2];
+    158          
+    159          		// 存储命令的高字节和低字节
+    160          		temp[0] = _getFirstByte(command);
+    161          		temp[1] = _getSecondByte(command);
+    162          
+    163          		// 存储读取的寄存器值
+    164          		for (uint16_t i = 0; i < length; i++)
+    165          		{
+    166          			temp[2 + 2 * i] = _getFirstByte(readreg[i]);
+    167          			temp[2 + 2 * i + 1] = _getSecondByte(readreg[i]);
+    168          		}
+    169          
+    170          		// 获取接收到的CRC校验值
+    171          		uint8_t crcReceivedFinal = _getSecondByte(safety);
+    172          
+    173          		// 计算CRC校验值
+    174          		uint8_t crc = _crcCalc(temp, lengthOfTemp);
+    175          
+    176          		// 比较计算出的CRC校验值和接收到的CRC校验值
+    177          		if (crc == crcReceivedFinal)
+    178          		{
+    179          			errorCheck = NO_ERROR; // 如果一致，则没有错误
+    180          		}
+    181          		else
+    182          		{
+    183          			errorCheck = CRC_ERROR; // 如果不一致，则CRC校验错误
+    184          			resetSafety(sensor); // 重置安全状态
+    185          		}
+    186          	}
+    187          
+    188          	return errorCheck;
+    189          }
+    190          
+    191          // 从传感器读取数据
+    192          errorTypes readFromSensor(TLE5012B_Sensor *sensor, uint16_t command, uint16_t *data)
+    193          {
+    194          	uint16_t safety = 0;
+    195          	uint16_t readreg;
+    196          	uint16_t u16RegValue = 0;
+    197          
+    198          	HAL_GPIO_WritePin(sensor->cs_gpio_port, sensor->cs_pin, GPIO_PIN_RESET); // 使能SPI片选
+    199          
+    200          	u16RegValue = command; // 设置命令
+    201          
+    202          #ifndef TLE5012_NOT_MODIFY_MOSI_MANUALLY
+    203          	// 设置MOSI引脚为复用推挽模式
+    204          	TLE5012_SET_MOSI_MODE_AF_PP();
+    205          #endif
+    206          
+    207          	// 发送命令
+    208          	HAL_SPI_Transmit(sensor->spi, (uint8_t *)(&u16RegValue), sizeof(u16RegValue) / sizeof(uint16_t), 0xFF);
+    209          
+    210          #ifndef TLE5012_NOT_MODIFY_MOSI_MANUALLY
+    211          	// 设置MOSI引脚为输入模式
+    212          	TLE5012_SET_MOSI_MODE_INPUT();
+    213          #endif
+    214          
+    215          	// 接收数据
+    216          	HAL_SPI_Receive(sensor->spi, (uint8_t *)(&readreg), 1, 0xFF);
+    217          	HAL_SPI_Receive(sensor->spi, (uint8_t *)(&safety), 1, 0xFF);
+    218          
+    219          	HAL_GPIO_WritePin(sensor->cs_gpio_port, sensor->cs_pin, GPIO_PIN_SET); // 禁用SPI片选
+    220          
+    221          	// 检查安全状态和CRC校验
+    222          	errorTypes checkError = checkSafety(sensor, safety, command, &readreg, 1);
+    223          
+    224          	if (checkError != NO_ERROR)
+    225          	{
+    226          		*data = 0; // 如果有错误，返回0
+    227          		return checkError;
+    228          	}
+    229          	else
+    230          	{
+    231          		*data = readreg; // 如果没有错误，返回读取的数据
+    232          		return NO_ERROR;
+    233          	}
+    234          }
+    235          
+    236          // 读取多个寄存器的值以计算CRC
+    237          errorTypes readBlockCRC(TLE5012B_Sensor *sensor)
+    238          {
+    239          	uint16_t u16RegValue = 0;
+    240          	uint16_t safety = 0;
+    241          
+    242          	HAL_GPIO_WritePin(sensor->cs_gpio_port, sensor->cs_pin, GPIO_PIN_RESET); // 使能SPI片选
+    243          
+    244          #ifndef TLE5012_NOT_MODIFY_MOSI_MANUALLY
+    245          	// 设置MOSI引脚为复用推挽模式
+    246          	TLE5012_SET_MOSI_MODE_AF_PP();
+    247          #endif
+    248          
+    249          	u16RegValue = READ_BLOCK_CRC; // 设置读取块CRC命令
+    250          	// 发送命令
+    251          	HAL_SPI_Transmit(sensor->spi, (uint8_t *)(&u16RegValue), sizeof(u16RegValue) / sizeof(uint16_t), 0xFFFF);
+    252          
+    253          #ifndef TLE5012_NOT_MODIFY_MOSI_MANUALLY
+    254          	// 设置MOSI引脚为输入模式
+    255          	TLE5012_SET_MOSI_MODE_INPUT();
+    256          #endif
+    257          
+    258          	// 接收寄存器数据
+    259          	HAL_SPI_Receive(sensor->spi, (uint8_t *)(sensor->registers), CRC_NUM_REGISTERS, 0xFF);
+    260          	// 接收安全状态数据
+    261          	HAL_SPI_Receive(sensor->spi, (uint8_t *)(&safety), 1, 0xFF);
+    262          
+    263          	// 检查安全状态和CRC校验
+    264          	errorTypes checkError = checkSafety(sensor, safety, READ_BLOCK_CRC, sensor->registers, CRC_NUM_REGISTERS);
+    265          
+    266          	return checkError;
+    267          }
+    268          
+    269          // 获取角度范围
+    270          errorTypes getAngleRange(TLE5012B_Sensor *sensor)
+    271          {
+    272          	uint16_t rawData = 0;
+    273          	// 读取中断模式2
+    274          	errorTypes checkError = readFromSensor(sensor, READ_INTMODE_2, &rawData);
+    275          
+    276          	if (checkError != NO_ERROR)
+    277          	{
+    278          		return checkError; // 如果有错误，返回错误码
+    279          	}
+    280          
+    281          	// 提取角度范围相关的位
+    282          	rawData &= GET_BIT_14_4;
+    283          	rawData >>= 4;
+    284          
+    285          	// 计算角度范围
+    286          	sensor->AngleRange = ANGLE_360_VAL * (POW_2_7 / (float)(rawData));
+    287          
+    288          	return NO_ERROR;
+    289          }
+    290          
+    291          // 读取角度值
+    292          errorTypes readAngleValue(TLE5012B_Sensor *sensor, int16_t *data)
+    293          {
+    294          	uint16_t rawData = 0;
+    295          	// 从传感器读取原始数据
+    296          	errorTypes status = readFromSensor(sensor, READ_ANGLE_VAL_CMD, &rawData);
+    297          
+    298          	if (status != NO_ERROR)
+    299          	{
+    300          		return status; // 如果有错误，返回错误码
+    301          	}
+    302          
+    303          	// 清除第15位
+    304          	rawData = (rawData & (DELETE_BIT_15));
+    305          
+    306          	// 检查第14位是否为1
+    307          	if (rawData & CHECK_BIT_14)
+    308          	{
+    309          		// 如果是，则转换为有符号整数
+    310          		rawData = rawData - CHANGE_UINT_TO_INT_15;
+    311          	}
+    312          
+    313          	*data = rawData; // 返回处理后的数据
+    314          
+    315          	return NO_ERROR;
+    316          }
+    317          
+    318          // 读取角度速度
+    319          errorTypes readAngleSpeed(TLE5012B_Sensor *sensor, int16_t *data)
+    320          {
+    321          	uint16_t rawData = 0;
+    322          	// 从传感器读取原始数据
+    323          	errorTypes status = readFromSensor(sensor, READ_ANGLE_SPD_CMD, &rawData);
+    324          
+    325          	if (status != NO_ERROR)
+    326          	{
+    327          		*data = 0; // 如果有错误，返回0
+    328          		return status;
+    329          	}
+    330          
+    331          	// 清除第15位
+    332          	rawData = (rawData & (DELETE_BIT_15));
+    333          
+    334          	// 检查第14位是否为1
+    335          	if (rawData & CHECK_BIT_14)
+    336          	{
+    337          		// 如果是，则转换为有符号整数
+    338          		rawData = rawData - CHANGE_UINT_TO_INT_15;
+    339          	}
+    340          
+    341          	*data = rawData; // 返回处理后的数据
+    342          
+    343          	return NO_ERROR;
+    344          }
+    345          
+    346          // 读取更新后的角度值
+    347          errorTypes readUpdAngleValue(TLE5012B_Sensor *sensor, int16_t *data)
+    348          {
+    349          	uint16_t rawData = 0;
+    350          	// 从传感器读取原始数据
+    351          	errorTypes status = readFromSensor(sensor, READ_UPD_ANGLE_VAL_CMD, &rawData);
+    352          
+    353          	if (status != NO_ERROR)
+    354          	{
+    355          		*data = 0; // 如果有错误，返回0
+    356          		return status;
+    357          	}
+    358          
+    359          	// 清除第15位
+    360          	rawData = (rawData & (DELETE_BIT_15));
+    361          
+    362          	// 检查第14位是否为1
+    363          	if (rawData & CHECK_BIT_14)
+    364          	{
+    365          		// 如果是，则转换为有符号整数
+    366          		rawData = rawData - CHANGE_UINT_TO_INT_15;
+    367          	}
+    368          
+    369          	*data = rawData; // 返回处理后的数据
+    370          
+    371          	return NO_ERROR;
+    372          }
+    373          
+    374          // 读取更新后的角度速度
+    375          errorTypes readUpdAngleSpeed(TLE5012B_Sensor *sensor, int16_t *data)
+    376          {
+    377          	uint16_t rawData = 0;
+    378          	// 从传感器读取原始数据
+    379          	errorTypes status = readFromSensor(sensor, READ_UPD_ANGLE_SPD_CMD, &rawData);
+    380          
+    381          	if (status != NO_ERROR)
+    382          	{
+    383          		*data = 0; // 如果有错误，返回0
+    384          		return status;
+    385          	}
+    386          
+    387          	// 清除第15位
+    388          	rawData = (rawData & (DELETE_BIT_15));
+    389          
+    390          	// 检查第14位是否为1
+    391          	if (rawData & CHECK_BIT_14)
+    392          	{
+    393          		// 如果是，则转换为有符号整数
+    394          		rawData = rawData - CHANGE_UINT_TO_INT_15;
+    395          	}
+    396          
+    397          	*data = rawData; // 返回处理后的数据
+    398          
+    399          	return NO_ERROR;
+    400          }
+    401          
+    402          // 读取更新后的角度旋转次数
+    403          errorTypes readUpdAngleRevolution(TLE5012B_Sensor *sensor, int16_t *data)
+    404          {
+    405          	uint16_t rawData = 0;
+    406          
+    407          	// 从传感器读取原始数据
+    408          	errorTypes status = readFromSensor(sensor, READ_UPD_ANGLE_REV_CMD, &rawData);
+    409          
+    410          	if (status != NO_ERROR)
+    411          	{
+    412          		*data = 0; // 如果有错误，返回0
+    413          		return status;
+    414          	}
+    415          
+    416          	// 清除低7位
+    417          	rawData = (rawData & (DELETE_7BITS));
+    418          
+    419          	// 检查第9位是否为1
+    420          	if (rawData & CHECK_BIT_9)
+    421          	{
+    422          		// 如果是，则转换为有符号整数
+    423          		rawData = rawData - CHANGE_UNIT_TO_INT_9;
+    424          	}
+    425          
+    426          	*data = rawData; // 返回处理后的数据
+    427          
+    428          	return NO_ERROR;
+    429          }
+    430          
+    431          // 读取角度旋转次数
+    432          errorTypes getNumRevolutions(TLE5012B_Sensor *sensor)
+    433          {
+    434          	uint16_t rawData = 0;
+    435          	// 从传感器读取原始数据
+    436          	errorTypes status = readFromSensor(sensor, READ_ANGLE_REV_CMD, &rawData);
+    437          
+    438          	if (status != NO_ERROR)
+    439          	{
+    440          		return status; // 如果有错误，返回错误码
+    441          	}
+    442          
+    443          	// 清除低7位
+    444          	rawData = (rawData & (DELETE_7BITS));
+    445          
+    446          	// 检查第9位是否为1
+    447          	if (rawData & CHECK_BIT_9)
+    448          	{
+    449          		// 如果是，则转换为有符号整数
+    450          		rawData = rawData - CHANGE_UNIT_TO_INT_9;
+    451          	}
+    452          
+    453          	sensor->NumRev = rawData; // 返回处理后的数据
+    454          
+    455          	return NO_ERROR;
+    456          }
+    457          
+    458          // 读取温度
+    459          errorTypes readTemp(TLE5012B_Sensor *sensor, int16_t *data)
+    460          {
+    461          	uint16_t rawData = 0;
+    462          	// 从传感器读取原始数据
+    463          	errorTypes status = readFromSensor(sensor, READ_TEMP_CMD, &rawData);
+    464          
+    465          	if (status != NO_ERROR)
+    466          	{
+    467          		*data = 0; // 如果有错误，返回0
+    468          		return status;
+    469          	}
+    470          
+    471          	// 清除低7位
+    472          	rawData = (rawData & (DELETE_7BITS));
+    473          
+    474          	// 检查第9位是否为1
+    475          	if (rawData & CHECK_BIT_9)
+    476          	{
+    477          		// 如果是，则转换为有符号整数
+    478          		rawData = rawData - CHANGE_UNIT_TO_INT_9;
+    479          	}
+    480          
+    481          	*data = rawData; // 返回处理后的数据
+    482          
+    483          	return NO_ERROR;
+    484          }
+    485          
+    486          // 计算角度速度
+    487          float _calculateAngleSpeed(float angRange, int16_t rawAngleSpeed, uint16_t firMD, uint16_t predictionVal)
+    488          {
+    489          	float finalAngleSpeed;
+    490          	float microsecToSec = 0.000001; // 微秒到秒的转换因子
+    491          	float firMDVal;
+    492          
+    493          	// 根据firMD值设置相应的滤波器系数
+    494          	if (firMD == 1)
+    495          	{
+    496          		firMDVal = 42.7;
+    497          	}
+    498          	else if (firMD == 0)
+    499          	{
+    500          		firMDVal = 21.3;
+    501          	}
+    502          	else if (firMD == 2)
+    503          	{
+    504          		firMDVal = 85.3;
+    505          	}
+    506          	else if (firMD == 3)
+    507          	{
+    508          		firMDVal = 170.6;
+    509          	}
+    510          	else
+    511          	{
+    512          		firMDVal = 0;
+    513          	}
+    514          
+    515          	// 计算角度速度
+    516          	finalAngleSpeed = ((angRange / POW_2_15) * ((float)rawAngleSpeed)) / (((float)predictionVal) * firMDVal * microsecToSec);
+    517          
+    518          	return finalAngleSpeed;
+    519          }
+    520          
+    521          // 获取角度速度
+    522          errorTypes getAngleSpeed(TLE5012B_Sensor *sensor)
+    523          {
+    524          	int16_t rawAngleSpeed = 0;
+    525          	uint16_t firMDVal = 0;
+    526          	uint16_t intMode2Prediction = 0;
+    527          
+    528          	// 从传感器读取原始角度速度
+    529          	errorTypes checkError = readAngleSpeed(sensor, &rawAngleSpeed);
+    530          
+    531          	if (checkError != NO_ERROR)
+    532          	{
+    533          		return checkError; // 如果有错误，返回错误码
+    534          	}
+    535          
+    536          	// 获取角度范围
+    537          	checkError = getAngleRange(sensor);
+    538          
+    539          	if (checkError != NO_ERROR)
+    540          	{
+    541          		return checkError; // 如果有错误，返回错误码
+    542          	}
+    543          
+    544          	// 读取中断模式1
+    545          	checkError = readFromSensor(sensor, READ_INTMODE_1, &firMDVal);
+    546          
+    547          	if (checkError != NO_ERROR)
+    548          	{
+    549          		return checkError; // 如果有错误，返回错误码
+    550          	}
+    551          
+    552          	firMDVal >>= 14; // 右移14位以获取firMD值
+    553          
+    554          	// 读取中断模式2
+    555          	checkError = readFromSensor(sensor, READ_INTMODE_2, &intMode2Prediction);
+    556          
+    557          	if (checkError != NO_ERROR)
+    558          	{
+    559          		return checkError; // 如果有错误，返回错误码
+    560          	}
+    561          
+    562          	// 根据prediction位设置预测值
+    563          	if (intMode2Prediction & 0x0004)
+    564          	{
+    565          		intMode2Prediction = 3;
+    566          	}
+    567          	else
+    568          	{
+    569          		intMode2Prediction = 2;
+    570          	}
+    571          
+    572          	// 计算角度速度
+    573          	sensor->AngleSpeed = _calculateAngleSpeed(sensor->AngleRange, rawAngleSpeed, firMDVal, intMode2Prediction);
+    574          
+    575          	return NO_ERROR;
+    576          }
+    577          
+    578          // 获取角度值
+    579          errorTypes getAngleValue(TLE5012B_Sensor *sensor)
+    580          {
+    581          	int16_t rawAnglevalue = 0;
+    582          	// 从传感器读取原始角度值
+    583          	errorTypes checkError = readAngleValue(sensor, &rawAnglevalue);
+    584          
+    585          	if (checkError != NO_ERROR)
+    586          	{
+    587          		return checkError; // 如果有错误，返回错误码
+    588          	}
+    589          
+    590          	// 转换为浮点角度值
+    591          	sensor->AngleValue = (ANGLE_360_VAL / POW_2_15) * ((float)rawAnglevalue);
+    592          
+    593          	return NO_ERROR;
+    594          }
+    595          
+    596          
+    597          
+    598          // 获取更新后的角度速度
+    599          errorTypes getUpdAngleSpeed(TLE5012B_Sensor *sensor, float *angleSpeed)
+    600          {
+    601          	int16_t rawAngleSpeed = 0;
+    602          	uint16_t firMDVal = 0;
+    603          	uint16_t intMode2Prediction = 0;
+    604          
+    605          	// 从传感器读取原始角度速度
+    606          	errorTypes checkError = readUpdAngleSpeed(sensor, &rawAngleSpeed);
+    607          
+    608          	if (checkError != NO_ERROR)
+    609          	{
+    610          		return checkError; // 如果有错误，返回错误码
+    611          	}
+    612          
+    613          	// 获取角度范围
+    614          	checkError = getAngleRange(sensor);
+    615          
+    616          	if (checkError != NO_ERROR)
+    617          	{
+    618          		return checkError; // 如果有错误，返回错误码
+    619          	}
+    620          
+    621          	// 读取中断模式1
+    622          	checkError = readFromSensor(sensor, READ_INTMODE_1, &firMDVal);
+    623          
+    624          	if (checkError != NO_ERROR)
+    625          	{
+    626          		return checkError; // 如果有错误，返回错误码
+    627          	}
+    628          
+    629          	// 读取中断模式2
+    630          	checkError = readFromSensor(sensor, READ_INTMODE_2, &intMode2Prediction);
+    631          
+    632          	if (checkError != NO_ERROR)
+    633          	{
+    634          		return checkError; // 如果有错误，返回错误码
+    635          	}
+    636          
+    637          	// 根据prediction位设置预测值
+    638          	if (intMode2Prediction & 0x0004)
+    639          	{
+    640          		intMode2Prediction = 3;
+    641          	}
+    642          	else
+    643          	{
+    644          		intMode2Prediction = 2;
+    645          	}
+    646          
+    647          	// 计算角度速度
+    648          	*angleSpeed = _calculateAngleSpeed(sensor->AngleRange, rawAngleSpeed, firMDVal, intMode2Prediction);
+    649          
+    650          	return NO_ERROR;
+    651          }
+    652          
+    653          // 获取更新后的角度值
+    654          errorTypes getUpdAngleValue(TLE5012B_Sensor *sensor, float *angleValue)
+    655          {
+    656          	int16_t rawAnglevalue = 0;
+    657          	// 从传感器读取原始角度值
+    658          	errorTypes checkError = readUpdAngleValue(sensor, &rawAnglevalue);
+    659          
+    660          	if (checkError != NO_ERROR)
+    661          	{
+    662          		return checkError; // 如果有错误，返回错误码
+    663          	}
+    664          
+    665          	// 转换为浮点角度值
+    666          	*angleValue = (ANGLE_360_VAL / POW_2_15) * ((float)rawAnglevalue);
+    667          
+    668          	return NO_ERROR;
+    669          }
+    670          
+    671          
+    672          
+    673          // 获取温度
+    674          errorTypes getTemperature(TLE5012B_Sensor *sensor)
+    675          {
+    676          	int16_t rawTemp = 0;
+    677          	// 从传感器读取原始温度值
+    678          	errorTypes checkError = readTemp(sensor, &rawTemp);
+    679          
+    680          	if (checkError != NO_ERROR)
+    681          	{
+    682          		return checkError; // 如果有错误，返回错误码
+    683          	}
+    684          
+    685          	// 转换为浮点温度值
+    686          	sensor->Temperature = (rawTemp + TEMP_OFFSET) / (TEMP_DIV);
+    687          
+    688          	return NO_ERROR;
+    689          }
+    690          
+    691          
+    692          float MechAngleToElecAngle(float mech_angle, float offset, int pole_pairs)
+    693          {
+    694              // 处理无效的极对数输入
+    695              if (pole_pairs <= 0) {
+    696                  return 0.0f;
+    697              }
+    698          
+    699              // 计算总机械角度（机械角度 + 偏移）
+    700              float total_mech = mech_angle + offset;
+    701              
+    702              // 将总机械角度归一化到[0, 360)范围
+    703              total_mech = fmodf(total_mech, 360.0f);
+    704              if (total_mech < 0.0f) {
+    705                  total_mech += 360.0f;
+    706              }
+    707              
+    708              // 计算电角度 = (总机械角度 × 极对数) mod 360
+    709              float elec_angle = fmodf(total_mech * pole_pairs, 360.0f);
+    710              
+    711              // 确保电角度在[0, 360)范围内
+    712              if (elec_angle < 0.0f) {
+    713                  elec_angle += 360.0f;
+    714              }
+    715              
+    716              return elec_angle;
+    717          }
+    718          
+    719          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   MechAngleToElecAngle
+        16   -> fmodf
+      24   TLE5012_SET_MOSI_MODE_AF_PP
+        24   -> HAL_GPIO_Init
+        24   -> __aeabi_memclr4
+      24   TLE5012_SET_MOSI_MODE_INPUT
+        24   -> HAL_GPIO_Init
+        24   -> __aeabi_memclr4
+      32   _calculateAngleSpeed
+        32   -> __aeabi_d2f
+        32   -> __aeabi_ddiv
+        32   -> __aeabi_dmul
+        32   -> __aeabi_f2d
+       8   _crc8
+       0   _crcCalc
+         0   -> _crc8
+       0   _getFirstByte
+       0   _getSecondByte
+      56   checkSafety
+        56   -> _crcCalc
+        56   -> _getFirstByte
+        56   -> _getSecondByte
+        56   -> resetSafety
+      16   getAngleRange
+        16   -> __aeabi_d2f
+        16   -> __aeabi_ddiv
+        16   -> __aeabi_dmul
+        16   -> __aeabi_f2d
+        16   -> readFromSensor
+      16   getAngleSpeed
+        16   -> _calculateAngleSpeed
+        16   -> getAngleRange
+        16   -> readAngleSpeed
+        16   -> readFromSensor
+      16   getAngleValue
+        16   -> readAngleValue
+      16   getNumRevolutions
+        16   -> readFromSensor
+      16   getTemperature
+        16   -> __aeabi_d2f
+        16   -> __aeabi_dadd
+        16   -> __aeabi_ddiv
+        16   -> __aeabi_i2d
+        16   -> readTemp
+      24   getUpdAngleSpeed
+        24   -> _calculateAngleSpeed
+        24   -> getAngleRange
+        24   -> readFromSensor
+        24   -> readUpdAngleSpeed
+      16   getUpdAngleValue
+        16   -> readUpdAngleValue
+      16   readAngleSpeed
+        16   -> readFromSensor
+      16   readAngleValue
+        16   -> readFromSensor
+      24   readBlockCRC
+        24   -> HAL_GPIO_WritePin
+        24   -> HAL_SPI_Receive
+        24   -> HAL_SPI_Transmit
+        24   -> TLE5012_SET_MOSI_MODE_AF_PP
+        24   -> TLE5012_SET_MOSI_MODE_INPUT
+        24   -> checkSafety
+      32   readFromSensor
+        32   -> HAL_GPIO_WritePin
+        32   -> HAL_SPI_Receive
+        32   -> HAL_SPI_Transmit
+        32   -> TLE5012_SET_MOSI_MODE_AF_PP
+        32   -> TLE5012_SET_MOSI_MODE_INPUT
+        32   -> checkSafety
+      16   readTemp
+        16   -> readFromSensor
+      16   readUpdAngleRevolution
+        16   -> readFromSensor
+      16   readUpdAngleSpeed
+        16   -> readFromSensor
+      16   readUpdAngleValue
+        16   -> readFromSensor
+      16   resetSafety
+        16   -> HAL_GPIO_WritePin
+        16   -> HAL_SPI_Transmit
+       8   triggerUpdate
+         0   -> HAL_GPIO_WritePin
+         8   -> HAL_GPIO_WritePin
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable9
+       4  ??DataTable9_1
+       4  ??DataTable9_10
+       4  ??DataTable9_11
+       4  ??DataTable9_12
+       4  ??DataTable9_13
+       4  ??DataTable9_2
+       4  ??DataTable9_3
+       4  ??DataTable9_4
+       4  ??DataTable9_5
+       4  ??DataTable9_6
+       4  ??DataTable9_7
+       4  ??DataTable9_8
+       4  ??DataTable9_9
+      20  ?_0
+      20  ?_1
+      92  MechAngleToElecAngle
+      46  TLE5012_SET_MOSI_MODE_AF_PP
+      40  TLE5012_SET_MOSI_MODE_INPUT
+     174  _calculateAngleSpeed
+      66  _crc8
+       2  _crcCalc
+       4  _getFirstByte
+       4  _getSecondByte
+     158  checkSafety
+      84  getAngleRange
+     128  getAngleSpeed
+      50  getAngleValue
+      64  getNumRevolutions
+      56  getTemperature
+     120  getUpdAngleSpeed
+      48  getUpdAngleValue
+      68  readAngleSpeed
+      62  readAngleValue
+     100  readBlockCRC
+     132  readFromSensor
+      68  readTemp
+      68  readUpdAngleRevolution
+      68  readUpdAngleSpeed
+      68  readUpdAngleValue
+      88  resetSafety
+      56  triggerUpdate
+
+ 
+    40 bytes in section .rodata
+ 1 970 bytes in section .text
+ 
+ 1 970 bytes of CODE  memory
+    40 bytes of CONST memory
+
+Errors: none
+Warnings: none

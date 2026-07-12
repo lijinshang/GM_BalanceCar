@@ -1,0 +1,137 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:36
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\dma.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW904.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\dma.c" -D
+#        USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\dma.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\dma.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\dma.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * @file    dma.c
+      5            * @brief   This file provides code for the configuration
+      6            *          of all the requested memory to memory DMA transfers.
+      7            ******************************************************************************
+      8            * @attention
+      9            *
+     10            * Copyright (c) 2025 STMicroelectronics.
+     11            * All rights reserved.
+     12            *
+     13            * This software is licensed under terms that can be found in the LICENSE file
+     14            * in the root directory of this software component.
+     15            * If no LICENSE file comes with this software, it is provided AS-IS.
+     16            *
+     17            ******************************************************************************
+     18            */
+     19          /* USER CODE END Header */
+     20          
+     21          /* Includes ------------------------------------------------------------------*/
+     22          #include "dma.h"
+     23          
+     24          /* USER CODE BEGIN 0 */
+     25          
+     26          /* USER CODE END 0 */
+     27          
+     28          /*----------------------------------------------------------------------------*/
+     29          /* Configure DMA                                                              */
+     30          /*----------------------------------------------------------------------------*/
+     31          
+     32          /* USER CODE BEGIN 1 */
+     33          
+     34          /* USER CODE END 1 */
+     35          
+     36          /**
+     37            * Enable DMA controller clock
+     38            */
+     39          void MX_DMA_Init(void)
+     40          {
+     41          
+     42            /* DMA controller clock enable */
+     43            __HAL_RCC_DMA2_CLK_ENABLE();
+     44          
+     45            /* DMA interrupt init */
+     46            /* DMA2_Stream0_IRQn interrupt configuration */
+     47            HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
+     48            HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+     49            /* DMA2_Stream1_IRQn interrupt configuration */
+     50            HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
+     51            HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+     52            /* DMA2_Stream6_IRQn interrupt configuration */
+     53            HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 5, 0);
+     54            HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
+     55          
+     56          }
+     57          
+     58          /* USER CODE BEGIN 2 */
+     59          
+     60          /* USER CODE END 2 */
+     61          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   MX_DMA_Init
+         0   -> HAL_NVIC_EnableIRQ
+         8   -> HAL_NVIC_EnableIRQ
+         8   -> HAL_NVIC_SetPriority
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      84  MX_DMA_Init
+
+ 
+ 84 bytes in section .text
+ 
+ 84 bytes of CODE memory
+
+Errors: none
+Warnings: none

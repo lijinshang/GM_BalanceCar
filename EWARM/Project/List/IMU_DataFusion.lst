@@ -1,0 +1,277 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:37
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\IMU\IMU_DataFusion.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EWFE1.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\IMU\IMU_DataFusion.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\IMU_DataFusion.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\IMU_DataFusion.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\IMU\IMU_DataFusion.c
+      1          /*****************************************************************************
+      2          程序名称：IMU数据融合
+      3          程 序 员：李锦上 Email：lijinshang@126.com 
+      4          使用说明：
+      5          	mpu_3axes accel, gyro;
+      6          	mpu_3axes EulerAngles;
+      7          	
+      8          	accel.x = (float)dev->accel.x;
+      9          	accel.y = (float)dev->accel.y;
+     10          	accel.z = (float)dev->accel.z;
+     11          	gyro.x = (float)dev->gyro.x*DEG_TO_RAD;
+     12          	gyro.y = (float)dev->gyro.y*DEG_TO_RAD;
+     13          	gyro.z = (float)dev->gyro.z*DEG_TO_RAD;
+     14          	
+     15          	EulerAngles = IMU_DataFusion(accel, gyro);
+     16          	dev->EulerAngles_Roll = EulerAngles.x;
+     17          	dev->EulerAngles_Pitch = EulerAngles.y;
+     18          
+     19          修改历史：
+     20          2025-3-19：修改yaw计算错误
+     21          2022-6-22：调试完成
+     22          2022-6-18：移植于四轴飞行器算法
+     23          ******************************************************************************/
+     24          #include "IMU_DataFusion.h"
+     25          #include "math.h"
+     26          //#include "arm_math.h" //arm_sqrt arm_atan2_f32
+     27          
+     28          #define RAD_TO_DEG 57.295779513082320876798154814105
+     29          #define DEG_TO_RAD 0.01745329251994329576923690768489
+     30          
+     31          
+     32          
+     33          /******************************************************************************
+     34          函数：IMU姿态解算
+     35          参数：accel：加速度计 g; gyro：陀螺仪 弧度/秒
+     36          返回：roll/pitch/yaw
+     37          备注：M0:590us M3:300us M4:60us
+     38          ******************************************************************************/
+     39          mpu_3axes IMU_AttitudeAlgorithm(mpu_3axes accel,  mpu_3axes gyro)
+     40          {
+     41          	mpu_3axes EulerAngles = {0,0,0};
+     42          	
+     43          	float Kp = IMU_Kp;
+     44          	float Ki = IMU_Ki;
+     45          
+     46          	static float q0 = 1, q1 = 0, q2 = 0, q3 = 0;//初始姿态四元数 由变换四元数公式得来
+     47          	static float exInt = 0, eyInt = 0, ezInt = 0;//当前加计测得的重力加速度在三轴上的分量
+     48          
+     49          	float norm; //矢量的模或四元数的范数
+     50          	float vx, vy, vz;//当前姿态计算得来的重力在三轴上的分量
+     51          	float ex, ey, ez;//当前加计测得的重力加速度在三轴上的分量
+     52          	
+     53          	//与用当前姿态计算得来的重力在三轴上的分量的误差
+     54          	//单位化加速度计 求模
+     55          	norm = sqrt(accel.x*accel.x + accel.y*accel.y + accel.z*accel.z);
+     56          	//归一化
+     57          	if(norm < 0.1f)//自由落体
+     58          	{
+     59          		accel.x = 0;
+     60          		accel.y = 0;
+     61          		accel.z = 0;
+     62          	}
+     63          	else
+     64          	{
+     65          		accel.x = accel.x / norm;
+     66          		accel.y = accel.y / norm;
+     67          		accel.z = accel.z / norm;
+     68          	}
+     69          	
+     70          	//动态参数计算
+     71          	//根据加速度模值调整Kp/Ki（静止时强修正，运动时弱修正）
+     72          	Kp = IMU_Kp * (1.0f - fminf(fabs(norm - 1.0f) * ACCEL_DEVIAT_GAIN , MAX_PARAM_ATTENUATION));
+     73          	Ki = IMU_Ki * (1.0f - fminf(fabs(norm - 1.0f) * ACCEL_DEVIAT_GAIN , MAX_PARAM_ATTENUATION));
+     74          	
+     75          	//用当前姿态计算出重力在三个轴上的分量
+     76          	//参考坐标n系转化到载体坐标b系的用四元数表示的方向余弦矩阵第三列即是
+     77          	vx = 2*(q1*q3 - q0*q2);
+     78          	vy = 2*(q0*q1 + q2*q3);
+     79          	vz = q0*q0 - q1*q1 - q2*q2 + q3*q3;
+     80          	
+     81          	//计算测得的重力与计算得重力间的误差，向量外积可以表示这一误差
+     82          	//原因我理解是因为两个向量是单位向量且sin0等于0
+     83          	ex = (accel.y*vz - accel.z*vy);
+     84          	ey = (accel.z*vx - accel.x*vz);
+     85          	ez = (accel.x*vy - accel.y*vx);
+     86          	
+     87          	//积分更新(带Z轴抑制)
+     88          	exInt = exInt + ex * Ki;
+     89          	eyInt = eyInt + ey * Ki;
+     90          	ezInt = ezInt * 0.995f + ez * Ki; // Z轴衰减
+     91          	
+     92          	// adjusted gyroscope measurements
+     93          	gyro.x = gyro.x + Kp*ex + exInt;//将误差PI后补偿到陀螺仪，即补偿零点漂移
+     94          	gyro.y = gyro.y + Kp*ey + eyInt;
+     95          	gyro.z = gyro.z + Kp*ez + ezInt;//这里的z轴由于没有进行矫正会产生漂移
+     96          	
+     97          	//下面进行姿态的更新，也就是四元数微分方程的求解
+     98          	//采用一阶毕卡解法
+     99          	q0 = q0 + (-q1*gyro.x - q2*gyro.y - q3*gyro.z)*halfT;
+    100          	q1 = q1 + ( q0*gyro.x + q2*gyro.z - q3*gyro.y)*halfT;
+    101          	q2 = q2 + ( q0*gyro.y - q1*gyro.z + q3*gyro.x)*halfT;
+    102          	q3 = q3 + ( q0*gyro.z + q1*gyro.y - q2*gyro.x)*halfT;
+    103          	
+    104          	//单位化四元数在空间旋转时不会拉伸，仅有旋转角度
+    105          	norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
+    106          	q0 = q0 / norm;
+    107          	q1 = q1 / norm;
+    108          	q2 = q2 / norm;
+    109          	q3 = q3 / norm;
+    110          	
+    111          	//四元数到欧拉角的转换 这里输出的是弧度 *RAD_TO_DEG变换角度
+    112          	//其中Yay航向角由于加速度计对其没有修正作用 因此此处直接用陀螺仪积分代替 想要准确需要使用磁力计
+    113          	//欧拉角顺序为绕固定坐标系旋转的顺序（XYZ）
+    114          	EulerAngles.x = atan2(2.0f * (q0*q1 + q2*q3), 1.0f - 2.0f * (q1*q1 + q2*q2)) * RAD_TO_DEG; // roll
+    115          	EulerAngles.y = asin(2.0f * (q0*q2 - q1*q3)) * RAD_TO_DEG; // pitch
+    116          	EulerAngles.z = atan2(2.0f * (q0*q3 + q1*q2), 1.0f - 2.0f * (q2*q2 + q3*q3)) * RAD_TO_DEG; // yaw
+    117          	
+    118          	return EulerAngles;
+    119          }
+    120          
+    121          // 跌倒检测函数
+    122          uint8_t DetectFall(mpu_3axes accel,  mpu_3axes gyro)
+    123          {
+    124          	// 设定加速度和角速度的阈值
+    125          	const int16_t accThreshold = 200; // 加速度阈值
+    126          	const int16_t gyroThreshold = 5; // 角速度阈值
+    127          	const int16_t ACC_ERROR_MAX = 3;
+    128          	const int16_t GYRO_ERROR_MAX = 10;
+    129          	static uint16_t accCount = 0;
+    130          	static uint16_t gyroCount = 0;
+    131          
+    132          	// 计算加速度的模
+    133          	float accMagnitude = sqrt(accel.x * accel.x + accel.y * accel.y + accel.z * accel.z);
+    134          
+    135          	// 计算角速度的模
+    136          	float gyroMagnitude = sqrt(gyro.x * gyro.x + gyro.y * gyro.y + gyro.z * gyro.z);
+    137          
+    138          
+    139          	if(accMagnitude < accThreshold)
+    140          	{
+    141          		if(accCount < ACC_ERROR_MAX)
+    142          			accCount++;
+    143          	}
+    144          	else
+    145          		accCount = 0;
+    146          
+    147          	if(gyroMagnitude > gyroThreshold)
+    148          	{
+    149          		if(gyroCount < GYRO_ERROR_MAX)
+    150          			gyroCount++;
+    151          	}
+    152          	else
+    153          		gyroCount = 0;
+    154          	
+    155          	
+    156          	// 如果加速度小于阈值且角速度大于阈值，则判断为跌倒
+    157          	if (accCount >= ACC_ERROR_MAX || gyroCount >= GYRO_ERROR_MAX)
+    158          	{
+    159          //		Error_Fall = 1;
+    160          		return 1; // 跌倒事件发生
+    161          	}
+    162          	else
+    163          	{
+    164          		return 0; // 未发生跌倒事件
+    165          	}
+    166          }
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      24   DetectFall
+        24   -> __aeabi_d2f
+        24   -> __aeabi_f2d
+        24   -> sqrt
+      72   IMU_AttitudeAlgorithm
+        72   -> __aeabi_d2f
+        72   -> __aeabi_dmul
+        72   -> __aeabi_f2d
+        72   -> asin
+        72   -> atan2
+        72   -> fminf
+        72   -> sqrt
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+       8  ??DataTable1_2
+       4  ??DataTable2
+       4  ??DataTable2_1
+       4  ??DataTable2_2
+       4  ??DataTable2_3
+       4  ??DataTable2_4
+       4  ??DataTable2_5
+       8  ??DataTable2_6
+       4  ??DataTable2_7
+      12  ?_0
+     188  DetectFall
+     866  IMU_AttitudeAlgorithm
+       4  accCount
+          gyroCount
+      28  q0
+          q1
+          q2
+          q3
+          exInt
+          eyInt
+          ezInt
+
+ 
+     4 bytes in section .bss
+    28 bytes in section .data
+    12 bytes in section .rodata
+ 1 106 bytes in section .text
+ 
+ 1 106 bytes of CODE  memory
+    12 bytes of CONST memory
+    32 bytes of DATA  memory
+
+Errors: none
+Warnings: none

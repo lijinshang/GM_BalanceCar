@@ -1,0 +1,332 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:39
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\SSD1306.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW15A8.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\SSD1306.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\SSD1306.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\SSD1306.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\SSD1306.c
+      1          /*****************************************************************************
+      2          程 序 名：SSD1306
+      3          作    者：李锦上 Email：lijinshang@126.com 
+      4          开发环境：Keil
+      5          功能简述：SSD1306驱动
+      6          硬件说明：通过4线模拟SPI驱动UC1701 128*64 单色屏
+      7          其它说明：
+      8          修改历史：
+      9          立项时间：2020-7-20
+     10          控制芯片：通用
+     11          ******************************************************************************/
+     12          
+     13          #include "SSD1306.h"
+     14          
+     15          #include "gpio.h"
+     16          #include "spi.h"
+     17          #include "cmsis_os.h"
+     18          
+     19          /*****************************************************************************
+     20          //OLED的显存
+     21          //存放格式如下:
+     22          //[0]0 1 2 3 ... 127
+     23          //[1]0 1 2 3 ... 127
+     24          //[2]0 1 2 3 ... 127
+     25          //[3]0 1 2 3 ... 127
+     26          //[4]0 1 2 3 ... 127
+     27          //[5]0 1 2 3 ... 127
+     28          //[6]0 1 2 3 ... 127
+     29          //[7]0 1 2 3 ... 127
+     30          *****************************************************************************/
+     31          unsigned char OLED_GRAM[OLED_YSIZE_PHYS/8][OLED_XSIZE_PHYS];  // [Y][X]
+     32          
+     33          /*****************************************************************************
+     34          函 数 名  : 写字节
+     35          输入参数  : 无
+     36          返 回 值  : 无
+     37          *****************************************************************************/
+     38          void OLED_WR_Byte(unsigned char dat, unsigned char cmd)
+     39          {
+     40          //	OLED_CS_WRITE(0);
+     41          
+     42          	OLED_DC_WRITE(cmd);
+     43          	
+     44          	SPI2_ReadWriteByte(dat);
+     45          
+     46          //	OLED_CS_WRITE(1);
+     47          
+     48          }
+     49          
+     50          /*****************************************************************************
+     51           函 数 名  : OLED_Init
+     52           功能描述  : 初始化SSD1306
+     53           输入参数  : NONE
+     54           输出参数  : NONE
+     55           返 回 值  : NONE
+     56          *****************************************************************************/
+     57          void OLED_Init(void)
+     58          {
+     59          	OLED_CS_WRITE(0);
+     60          	
+     61          	OLED_WR_Byte(0xAE,OLED_CMD);//--turn off oled panel
+     62          	OLED_WR_Byte(0x00,OLED_CMD);//---set low column address
+     63          	OLED_WR_Byte(0x10,OLED_CMD);//---set high column address
+     64          	OLED_WR_Byte(0x40,OLED_CMD);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
+     65          	OLED_WR_Byte(0x81,OLED_CMD);//--set contrast control register
+     66          	OLED_WR_Byte(0xCF,OLED_CMD);// Set SEG Output Current Brightness
+     67          	OLED_WR_Byte(0xA1,OLED_CMD);//--Set SEG/Column Mapping     0xa0左右反置 0xa1正常
+     68          	OLED_WR_Byte(0xC8,OLED_CMD);//Set COM/Row Scan Direction   0xc0上下反置 0xc8正常
+     69          	OLED_WR_Byte(0xA6,OLED_CMD);//--set normal display
+     70          	OLED_WR_Byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
+     71          	OLED_WR_Byte(0x3f,OLED_CMD);//--1/64 duty
+     72          	OLED_WR_Byte(0xD3,OLED_CMD);//-set display offset	Shift Mapping RAM Counter (0x00~0x3F)
+     73          	OLED_WR_Byte(0x00,OLED_CMD);//-not offset
+     74          	OLED_WR_Byte(0xd5,OLED_CMD);//--set display clock divide ratio/oscillator frequency
+     75          	OLED_WR_Byte(0x80,OLED_CMD);//--set divide ratio, Set Clock as 100 Frames/Sec
+     76          	OLED_WR_Byte(0xD9,OLED_CMD);//--set pre-charge period
+     77          	OLED_WR_Byte(0xF1,OLED_CMD);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
+     78          	OLED_WR_Byte(0xDA,OLED_CMD);//--set com pins hardware configuration
+     79          	OLED_WR_Byte(0x12,OLED_CMD);
+     80          	OLED_WR_Byte(0xDB,OLED_CMD);//--set vcomh
+     81          	OLED_WR_Byte(0x40,OLED_CMD);//Set VCOM Deselect Level
+     82          	OLED_WR_Byte(0x20,OLED_CMD);//-Set Page Addressing Mode (0x00/0x01/0x02)
+     83          	OLED_WR_Byte(0x02,OLED_CMD);//
+     84          	OLED_WR_Byte(0x8D,OLED_CMD);//--set Charge Pump enable/disable
+     85          	OLED_WR_Byte(0x14,OLED_CMD);//--set(0x10) disable
+     86          	OLED_WR_Byte(0xA4,OLED_CMD);// Disable Entire Display On (0xa4/0xa5)
+     87          	OLED_WR_Byte(0xA6,OLED_CMD);// Disable Inverse Display On (0xa6/a7) 
+     88          	OLED_WR_Byte(0xAF,OLED_CMD);
+     89          
+     90          	OLED_CS_WRITE(1);
+     91          	
+     92          	OLED_Clear();
+     93          }
+     94          
+     95          /*****************************************************************************
+     96           函 数 名  : OLED_Display_On
+     97           功能描述  : 开启OLED显示
+     98           输入参数  : NONE
+     99           输出参数  : NONE
+    100           返 回 值  : NONE
+    101          *****************************************************************************/
+    102          void OLED_Display_On(void)
+    103          {
+    104          	OLED_CS_WRITE(0);
+    105          	OLED_WR_Byte(0X8D, OLED_CMD);  //SET DCDC命令
+    106          	OLED_WR_Byte(0X14, OLED_CMD);  //DCDC ON
+    107          	OLED_WR_Byte(0XAF, OLED_CMD);  //DISPLAY ON
+    108          	OLED_CS_WRITE(1);
+    109          }
+    110          
+    111          /*****************************************************************************
+    112           函 数 名  : OLED_Display_Off
+    113           功能描述  : 关闭OLED显示
+    114           输入参数  : NONE
+    115           输出参数  : NONE
+    116           返 回 值  : NONE
+    117          *****************************************************************************/
+    118          void OLED_Display_Off(void)
+    119          {
+    120          	OLED_CS_WRITE(0);
+    121          	OLED_WR_Byte(0X8D, OLED_CMD);  //SET DCDC命令
+    122          	OLED_WR_Byte(0X10, OLED_CMD);  //DCDC OFF
+    123          	OLED_WR_Byte(0XAE, OLED_CMD);  //DISPLAY OFF
+    124          	OLED_CS_WRITE(1);
+    125          }
+    126          
+    127          /*****************************************************************************
+    128           函 数 名  : OLED_Clear
+    129           功能描述  : 清屏函数,清完屏,整个屏幕是黑色的!和没点亮一样
+    130           输入参数  : NONE
+    131           输出参数  : NONE
+    132           返 回 值  : NONE
+    133          *****************************************************************************/
+    134          void OLED_Clear(void)
+    135          {
+    136              unsigned char i, n;
+    137              for (i = 0; i < OLED_YSIZE_PHYS/8; i++)
+    138                  for (n = 0; n < OLED_XSIZE_PHYS; n++)
+    139                      OLED_GRAM[i][n] = 0X00;
+    140              OLED_Refresh_Gram(OLED_GRAM); // 更新显示
+    141          }
+    142          
+    143          
+    144          /*****************************************************************************
+    145           函 数 名  : OLED_SetPos
+    146           功能描述  : 设置坐标
+    147           输入参数  : unsigned char x  
+    148                       unsigned char y  
+    149           输出参数  : NONE
+    150           返 回 值  : NONE
+    151          *****************************************************************************/
+    152          void OLED_SetPos(unsigned char x, unsigned char y)
+    153          { 
+    154              OLED_WR_Byte((unsigned char)(0xb0 + y), OLED_CMD);
+    155              OLED_WR_Byte((unsigned char)(((x & 0xf0) >> 4) | 0x10), OLED_CMD);
+    156              OLED_WR_Byte((unsigned char)((x & 0x0f) | 0x00), OLED_CMD); 
+    157          }
+    158          
+    159          /*****************************************************************************
+    160           函 数 名  : OLED_SetPoint
+    161           功能描述  : 画点
+    162           输入参数  : unsigned char x		0~127
+    163                       unsigned char y		0~63
+    164                       unsigned char color		0 清空 1 填充 2 反显 
+    165           输出参数  : NONE
+    166           返 回 值  : NONE
+    167          *****************************************************************************/
+    168          void OLED_SetPoint(unsigned int x, unsigned int y, unsigned char color)
+    169          {
+    170              unsigned char pos, bx, temp = 0;
+    171              
+    172              if (x >= OLED_XSIZE_PHYS || y >= OLED_YSIZE_PHYS) return;  // 超出范围了
+    173              
+    174              pos = (unsigned char)(y / 8);
+    175              bx = (unsigned char)(y % 8);
+    176              temp = (unsigned char)(1 << (bx));
+    177              switch(color)
+    178              {
+    179                  default :
+    180                  case 0: OLED_GRAM[pos][x] &= ~temp; break;  // 清空
+    181                  case 1: OLED_GRAM[pos][x] |= temp; break;   // 填充
+    182                  case 2: OLED_GRAM[pos][x] ^= temp; break;   // 反显
+    183              }
+    184          }
+    185          
+    186          /*****************************************************************************
+    187           函 数 名  : 读点
+    188           输入参数  : unsigned char x		0~128
+    189                       unsigned char y		0~63
+    190          			 unsigned char color		0-1
+    191           返 回 值  : 颜色
+    192          *****************************************************************************/
+    193          unsigned char OLED_GetPoint(unsigned int x, unsigned int y)
+    194          {
+    195              if (x >= OLED_XSIZE_PHYS || y >= OLED_YSIZE_PHYS) return 0;  // 超出范围了
+    196          
+    197              return (OLED_GRAM[y/8][x] & (0x01 << (y%8))) >> (y%8);
+    198          }
+    199          
+    200          /*****************************************************************************
+    201           函 数 名  : OLED_Refresh_Gram
+    202           功能描述  : 更新显存到OLED
+    203           输入参数  : NONE
+    204           输出参数  : NONE
+    205           返 回 值  : NONE
+    206          *****************************************************************************/
+    207          void OLED_Refresh_Gram(uint8_t buff[OLED_YSIZE_PHYS/8][OLED_XSIZE_PHYS])
+    208          {
+    209              unsigned char i, n;
+    210              
+    211              OLED_CS_WRITE(0);
+    212              for (i = 0; i < OLED_YSIZE_PHYS/8; i++)
+    213              {
+    214                  OLED_WR_Byte((unsigned char)(0xb0 + i), OLED_CMD);  // 设置页地址（0~7）
+    215                  OLED_WR_Byte(0x00, OLED_CMD);  // 设置显示位置—列低地址
+    216                  OLED_WR_Byte(0x10, OLED_CMD);  // 设置显示位置—列高地址
+    217                  for (n = 0; n < OLED_XSIZE_PHYS; n++)
+    218                      OLED_WR_Byte(buff[i][n], OLED_DATA);
+    219              }
+    220              OLED_CS_WRITE(1);
+    221          }
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   OLED_Clear
+         0   -> OLED_Refresh_Gram
+       8   OLED_Display_Off
+         0   -> HAL_GPIO_WritePin
+         8   -> HAL_GPIO_WritePin
+         8   -> OLED_WR_Byte
+       8   OLED_Display_On
+         0   -> HAL_GPIO_WritePin
+         8   -> HAL_GPIO_WritePin
+         8   -> OLED_WR_Byte
+       0   OLED_GetPoint
+       8   OLED_Init
+         8   -> HAL_GPIO_WritePin
+         0   -> OLED_Clear
+         8   -> OLED_WR_Byte
+      24   OLED_Refresh_Gram
+         0   -> HAL_GPIO_WritePin
+        24   -> HAL_GPIO_WritePin
+        24   -> OLED_WR_Byte
+       4   OLED_SetPoint
+       8   OLED_SetPos
+         0   -> OLED_WR_Byte
+         8   -> OLED_WR_Byte
+       8   OLED_WR_Byte
+         8   -> HAL_GPIO_WritePin
+         0   -> SPI2_ReadWriteByte
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable7
+       4  ??DataTable7_1
+      42  OLED_Clear
+      56  OLED_Display_Off
+      56  OLED_Display_On
+    1024  OLED_GRAM
+      36  OLED_GetPoint
+     258  OLED_Init
+      98  OLED_Refresh_Gram
+      82  OLED_SetPoint
+      44  OLED_SetPos
+      26  OLED_WR_Byte
+
+ 
+ 1 024 bytes in section .bss
+   706 bytes in section .text
+ 
+   706 bytes of CODE memory
+ 1 024 bytes of DATA memory
+
+Errors: none
+Warnings: none

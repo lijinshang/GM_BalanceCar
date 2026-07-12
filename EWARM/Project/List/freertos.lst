@@ -1,0 +1,616 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:36
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\freertos.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW907.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\freertos.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\freertos.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\freertos.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\freertos.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * File Name          : freertos.c
+      5            * Description        : Code for freertos applications
+      6            ******************************************************************************
+      7            * @attention
+      8            *
+      9            * Copyright (c) 2025 STMicroelectronics.
+     10            * All rights reserved.
+     11            *
+     12            * This software is licensed under terms that can be found in the LICENSE file
+     13            * in the root directory of this software component.
+     14            * If no LICENSE file comes with this software, it is provided AS-IS.
+     15            *
+     16            ******************************************************************************
+     17            */
+     18          /* USER CODE END Header */
+     19          
+     20          /* Includes ------------------------------------------------------------------*/
+     21          #include "FreeRTOS.h"
+     22          #include "task.h"
+     23          #include "main.h"
+     24          #include "cmsis_os.h"
+     25          
+     26          /* Private includes ----------------------------------------------------------*/
+     27          /* USER CODE BEGIN Includes */
+     28          #include "Power.h"
+     29          #include "adc.h"
+     30          #include "i2c.h"
+     31          #include "spi.h"
+     32          #include "tim.h"
+     33          #include "SSD1306.h"
+     34          
+     35          #include "TinyFOC_hal.h"
+     36          #include "mpu6xxx.h"
+     37          
+     38          
+     39          #include "SerialDebug.h"
+     40          /* USER CODE END Includes */
+     41          
+     42          /* Private typedef -----------------------------------------------------------*/
+     43          /* USER CODE BEGIN PTD */
+     44          
+     45          /* USER CODE END PTD */
+     46          
+     47          /* Private define ------------------------------------------------------------*/
+     48          /* USER CODE BEGIN PD */
+     49          
+     50          /* USER CODE END PD */
+     51          
+     52          /* Private macro -------------------------------------------------------------*/
+     53          /* USER CODE BEGIN PM */
+     54          
+     55          
+     56          
+     57          int angle1 = 0;
+     58          int ElecAngle = 0;
+     59          /* USER CODE END PM */
+     60          
+     61          /* Private variables ---------------------------------------------------------*/
+     62          /* USER CODE BEGIN Variables */
+     63          
+     64          /* USER CODE END Variables */
+     65          osThreadId TimeBase_TaskHandle;
+     66          osThreadId LED_TaskHandle;
+     67          osThreadId ADC_TaskHandle;
+     68          osThreadId BUZZ_TaskHandle;
+     69          osThreadId Menu_TaskHandle;
+     70          osThreadId IMU_TaskHandle;
+     71          osThreadId CarSub_TaskHandle;
+     72          osThreadId Navigation_TaskHandle;
+     73          osThreadId Foc_TaskHandle;
+     74          osMutexId SPI_MutexHandle;
+     75          
+     76          /* Private function prototypes -----------------------------------------------*/
+     77          /* USER CODE BEGIN FunctionPrototypes */
+     78          
+     79          /* USER CODE END FunctionPrototypes */
+     80          
+     81          void Start_TimeBase_Task(void const * argument);
+     82          void Start_LED_Task(void const * argument);
+     83          void Start_ADC_Task(void const * argument);
+     84          void Start_BUZZ_Task(void const * argument);
+     85          void Start_Menu_Task(void const * argument);
+     86          void Start_IMU_Task(void const * argument);
+     87          void Start_CarSub_Task(void const * argument);
+     88          void Start_Navigation_Task(void const * argument);
+     89          void Start_Foc_Task(void const * argument);
+     90          
+     91          void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+     92          
+     93          /* GetIdleTaskMemory prototype (linked to static allocation support) */
+     94          void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
+     95          
+     96          /* GetTimerTaskMemory prototype (linked to static allocation support) */
+     97          void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize );
+     98          
+     99          /* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
+    100          static StaticTask_t xIdleTaskTCBBuffer;
+    101          static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
+    102          
+    103          void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+    104          {
+    105            *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
+    106            *ppxIdleTaskStackBuffer = &xIdleStack[0];
+    107            *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+    108            /* place for user code */
+    109          }
+    110          /* USER CODE END GET_IDLE_TASK_MEMORY */
+    111          
+    112          /* USER CODE BEGIN GET_TIMER_TASK_MEMORY */
+    113          static StaticTask_t xTimerTaskTCBBuffer;
+    114          static StackType_t xTimerStack[configTIMER_TASK_STACK_DEPTH];
+    115          
+    116          void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize )
+    117          {
+    118            *ppxTimerTaskTCBBuffer = &xTimerTaskTCBBuffer;
+    119            *ppxTimerTaskStackBuffer = &xTimerStack[0];
+    120            *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
+    121            /* place for user code */
+    122          }
+    123          /* USER CODE END GET_TIMER_TASK_MEMORY */
+    124          
+    125          /**
+    126            * @brief  FreeRTOS initialization
+    127            * @param  None
+    128            * @retval None
+    129            */
+    130          void MX_FREERTOS_Init(void) {
+    131            /* USER CODE BEGIN Init */
+    132          
+    133            /* USER CODE END Init */
+    134            /* Create the mutex(es) */
+    135            /* definition and creation of SPI_Mutex */
+    136            osMutexDef(SPI_Mutex);
+    137            SPI_MutexHandle = osMutexCreate(osMutex(SPI_Mutex));
+    138          
+    139            /* USER CODE BEGIN RTOS_MUTEX */
+    140            /* add mutexes, ... */
+    141            /* USER CODE END RTOS_MUTEX */
+    142          
+    143            /* USER CODE BEGIN RTOS_SEMAPHORES */
+    144            /* add semaphores, ... */
+    145            /* USER CODE END RTOS_SEMAPHORES */
+    146          
+    147            /* USER CODE BEGIN RTOS_TIMERS */
+    148            /* start timers, add new ones, ... */
+    149            /* USER CODE END RTOS_TIMERS */
+    150          
+    151            /* USER CODE BEGIN RTOS_QUEUES */
+    152            /* add queues, ... */
+    153            /* USER CODE END RTOS_QUEUES */
+    154          
+    155            /* Create the thread(s) */
+    156            /* definition and creation of TimeBase_Task */
+    157            osThreadDef(TimeBase_Task, Start_TimeBase_Task, osPriorityAboveNormal, 0, 256);
+    158            TimeBase_TaskHandle = osThreadCreate(osThread(TimeBase_Task), NULL);
+    159          
+    160            /* definition and creation of LED_Task */
+    161            osThreadDef(LED_Task, Start_LED_Task, osPriorityNormal, 0, 128);
+    162            LED_TaskHandle = osThreadCreate(osThread(LED_Task), NULL);
+    163          
+    164            /* definition and creation of ADC_Task */
+    165            osThreadDef(ADC_Task, Start_ADC_Task, osPriorityNormal, 0, 128);
+    166            ADC_TaskHandle = osThreadCreate(osThread(ADC_Task), NULL);
+    167          
+    168            /* definition and creation of BUZZ_Task */
+    169            osThreadDef(BUZZ_Task, Start_BUZZ_Task, osPriorityNormal, 0, 128);
+    170            BUZZ_TaskHandle = osThreadCreate(osThread(BUZZ_Task), NULL);
+    171          
+    172            /* definition and creation of Menu_Task */
+    173            osThreadDef(Menu_Task, Start_Menu_Task, osPriorityLow, 0, 512);
+    174            Menu_TaskHandle = osThreadCreate(osThread(Menu_Task), NULL);
+    175          
+    176            /* definition and creation of IMU_Task */
+    177            osThreadDef(IMU_Task, Start_IMU_Task, osPriorityNormal, 0, 128);
+    178            IMU_TaskHandle = osThreadCreate(osThread(IMU_Task), NULL);
+    179          
+    180            /* definition and creation of CarSub_Task */
+    181            osThreadDef(CarSub_Task, Start_CarSub_Task, osPriorityAboveNormal, 0, 256);
+    182            CarSub_TaskHandle = osThreadCreate(osThread(CarSub_Task), NULL);
+    183          
+    184            /* definition and creation of Navigation_Task */
+    185            osThreadDef(Navigation_Task, Start_Navigation_Task, osPriorityNormal, 0, 256);
+    186            Navigation_TaskHandle = osThreadCreate(osThread(Navigation_Task), NULL);
+    187          
+    188            /* definition and creation of Foc_Task */
+    189            osThreadDef(Foc_Task, Start_Foc_Task, osPriorityNormal, 0, 256);
+    190            Foc_TaskHandle = osThreadCreate(osThread(Foc_Task), NULL);
+    191          
+    192            /* USER CODE BEGIN RTOS_THREADS */
+    193            /* add threads, ... */
+    194            /* USER CODE END RTOS_THREADS */
+    195          
+    196          }
+    197          
+    198          /* USER CODE BEGIN Header_Start_TimeBase_Task */
+    199          /**
+    200            * @brief  Function implementing the TimeBase_Task thread.
+    201            * @param  argument: Not used
+    202            * @retval None
+    203            */
+    204          /* USER CODE END Header_Start_TimeBase_Task */
+    205          void Start_TimeBase_Task(void const * argument)
+    206          {
+    207            /* USER CODE BEGIN Start_TimeBase_Task */
+    208          	uint32_t n_1ms = 0;
+    209          	
+    210          	
+    211          
+    212          	
+    213          
+    214          
+    215          //  FOC_SetTorque(&foc, 3, _3PI_2);
+    216            osDelay(500);
+    217            
+    218          
+    219          	//启动tim
+    220          	__HAL_TIM_CLEAR_IT(&htim10,TIM_IT_UPDATE);//防止启动就进中断
+    221          	HAL_TIM_Base_Start_IT(&htim10);//启动tim
+    222          
+    223          
+    224          //  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 100);
+    225          //  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 500);
+    226          //  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, 900);
+    227            /* Infinite loop */
+    228          	for(;;)
+    229          	{
+    230          		n_1ms++;
+    231          		
+    232          //		Foc_TestOpenloopVelocity(&foc,10);
+    233          //		getAngleValue(&tle5012b_1);//读角度
+    234          //		angle1 = (int)(tle5012b_1.AngleValue);
+    235          //		
+    236          //		ElecAngle = (int)MechAngleToElecAngle(tle5012b_1.AngleValue, 0, 10);
+    237          		
+    238          		
+    239          
+    240          		
+    241          		
+    242          //		speed_pid_handler.expect = 10;
+    243          
+    244          		
+    245          		if(n_1ms%10==0)
+    246          		{
+    247          			PowerHandle();
+    248          		}
+    249          	
+    250          		if(Power.PowerStatus == ON)
+    251          		{
+    252          			if(n_1ms%10==0)
+    253          			{
+    254          				Get_Battery_Voltage();
+    255          //				getAngleValue(&tle5012b_1);//读角度
+    256          			}
+    257          			if(n_1ms%100==0)
+    258          			{
+    259          				
+    260          			}
+    261          			if(n_1ms%500==0)
+    262          			{
+    263          				LED_RUN_FLASH;
+    264          			}
+    265          		}
+    266          		else
+    267          		{
+    268          			LED_RUN_WRITE(LED_OFF);
+    269          		}
+    270          		osDelay(1);
+    271          	}
+    272            /* USER CODE END Start_TimeBase_Task */
+    273          }
+    274          
+    275          /* USER CODE BEGIN Header_Start_LED_Task */
+    276          /**
+    277          * @brief Function implementing the LED_Task thread.
+    278          * @param argument: Not used
+    279          * @retval None
+    280          */
+    281          /* USER CODE END Header_Start_LED_Task */
+    282          void Start_LED_Task(void const * argument)
+    283          {
+    284            /* USER CODE BEGIN Start_LED_Task */
+    285            /* Infinite loop */
+    286            for(;;)
+    287            {
+    288              osDelay(1);
+    289            }
+    290            /* USER CODE END Start_LED_Task */
+    291          }
+    292          
+    293          /* USER CODE BEGIN Header_Start_ADC_Task */
+    294          /**
+    295          * @brief Function implementing the ADC_Task thread.
+    296          * @param argument: Not used
+    297          * @retval None
+    298          */
+    299          /* USER CODE END Header_Start_ADC_Task */
+    300          void Start_ADC_Task(void const * argument)
+    301          {
+    302            /* USER CODE BEGIN Start_ADC_Task */
+    303            /* Infinite loop */
+    304            for(;;)
+    305            {
+    306              osDelay(1);
+    307            }
+    308            /* USER CODE END Start_ADC_Task */
+    309          }
+    310          
+    311          /* USER CODE BEGIN Header_Start_BUZZ_Task */
+    312          /**
+    313          * @brief Function implementing the BUZZ_Task thread.
+    314          * @param argument: Not used
+    315          * @retval None
+    316          */
+    317          /* USER CODE END Header_Start_BUZZ_Task */
+    318          void Start_BUZZ_Task(void const * argument)
+    319          {
+    320            /* USER CODE BEGIN Start_BUZZ_Task */
+    321            /* Infinite loop */
+    322            for(;;)
+    323            {
+    324              osDelay(1);
+    325            }
+    326            /* USER CODE END Start_BUZZ_Task */
+    327          }
+    328          
+    329          /* USER CODE BEGIN Header_Start_Menu_Task */
+    330          /**
+    331          * @brief Function implementing the Menu_Task thread.
+    332          * @param argument: Not used
+    333          * @retval None
+    334          */
+    335          /* USER CODE END Header_Start_Menu_Task */
+    336          void Start_Menu_Task(void const * argument)
+    337          {
+    338            /* USER CODE BEGIN Start_Menu_Task */
+    339            /* Infinite loop */
+    340            for(;;)
+    341            {
+    342              osDelay(1);
+    343            }
+    344            /* USER CODE END Start_Menu_Task */
+    345          }
+    346          
+    347          /* USER CODE BEGIN Header_Start_IMU_Task */
+    348          /**
+    349          * @brief Function implementing the IMU_Task thread.
+    350          * @param argument: Not used
+    351          * @retval None
+    352          */
+    353          /* USER CODE END Header_Start_IMU_Task */
+    354          void Start_IMU_Task(void const * argument)
+    355          {
+    356            /* USER CODE BEGIN Start_IMU_Task */
+    357          	osDelay(100);
+    358          	mpu6xxx.i2c_addr = MPU6050_I2C_ADDR;
+    359          	mpu6xxx_init(&mpu6xxx);
+    360          	mpu6xxx_init(&mpu6xxx);
+    361          	mpu6xxx_get_data(&mpu6xxx);
+    362          
+    363          
+    364            /* Infinite loop */
+    365          	for(;;)
+    366          	{
+    367          		mpu6xxx_get_data(&mpu6xxx);
+    368          		mpu6xxx_get_calc(&mpu6xxx);
+    369          
+    370          		osDelay(2);
+    371          	}
+    372            /* USER CODE END Start_IMU_Task */
+    373          }
+    374          
+    375          /* USER CODE BEGIN Header_Start_CarSub_Task */
+    376          /**
+    377          * @brief Function implementing the CarSub_Task thread.
+    378          * @param argument: Not used
+    379          * @retval None
+    380          */
+    381          /* USER CODE END Header_Start_CarSub_Task */
+    382          void Start_CarSub_Task(void const * argument)
+    383          {
+    384            /* USER CODE BEGIN Start_CarSub_Task */
+    385            /* Infinite loop */
+    386          	for(;;)
+    387          	{
+    388          		TinyFOC1.speed_pid_handler.target = 10;
+    389          		TinyFOC2.speed_pid_handler.target = 10;
+    390          		TinyFOC_MotorStart(&TinyFOC1);
+    391          		TinyFOC_MotorStart(&TinyFOC2);
+    392          		osDelay(2000);
+    393          		TinyFOC1.speed_pid_handler.target = -10;
+    394          		TinyFOC2.speed_pid_handler.target = -10;
+    395          		TinyFOC_MotorStart(&TinyFOC1);
+    396          		TinyFOC_MotorStart(&TinyFOC2);
+    397          		osDelay(2000);
+    398          		TinyFOC1.speed_pid_handler.target = 0;
+    399          		TinyFOC2.speed_pid_handler.target = 0;
+    400          		TinyFOC_MotorStop(&TinyFOC1);
+    401          		TinyFOC_MotorStop(&TinyFOC2);
+    402          		osDelay(2000);
+    403          	}
+    404            /* USER CODE END Start_CarSub_Task */
+    405          }
+    406          
+    407          /* USER CODE BEGIN Header_Start_Navigation_Task */
+    408          /**
+    409          * @brief Function implementing the Navigation_Task thread.
+    410          * @param argument: Not used
+    411          * @retval None
+    412          */
+    413          /* USER CODE END Header_Start_Navigation_Task */
+    414          void Start_Navigation_Task(void const * argument)
+    415          {
+    416            /* USER CODE BEGIN Start_Navigation_Task */
+    417            /* Infinite loop */
+    418            for(;;)
+    419            {
+    420              osDelay(1);
+    421            }
+    422            /* USER CODE END Start_Navigation_Task */
+    423          }
+    424          
+    425          /* USER CODE BEGIN Header_Start_Foc_Task */
+    426          /**
+    427          * @brief Function implementing the Foc_Task thread.
+    428          * @param argument: Not used
+    429          * @retval None
+    430          */
+    431          /* USER CODE END Header_Start_Foc_Task */
+    432          void Start_Foc_Task(void const * argument)
+    433          {
+    434            /* USER CODE BEGIN Start_Foc_Task */
+    435            /* Infinite loop */
+    436            for(;;)
+    437            {
+    438              osDelay(1);
+    439            }
+    440            /* USER CODE END Start_Foc_Task */
+    441          }
+    442          
+    443          /* Private application code --------------------------------------------------*/
+    444          /* USER CODE BEGIN Application */
+    445          void BUZZ(uint16_t ms)
+    446          {
+    447          	
+    448          }
+    449          /* USER CODE END Application */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   BUZZ
+     272   MX_FREERTOS_Init
+       272   -> __aeabi_memcpy4
+       272   -> osMutexCreate
+       272   -> osThreadCreate
+       8   Start_ADC_Task
+         8   -> osDelay
+       8   Start_BUZZ_Task
+         8   -> osDelay
+      16   Start_CarSub_Task
+        16   -> TinyFOC_MotorStart
+        16   -> TinyFOC_MotorStop
+        16   -> osDelay
+       8   Start_Foc_Task
+         8   -> osDelay
+       8   Start_IMU_Task
+         8   -> mpu6xxx_get_calc
+         8   -> mpu6xxx_get_data
+         8   -> mpu6xxx_init
+         8   -> osDelay
+       8   Start_LED_Task
+         8   -> osDelay
+       8   Start_Menu_Task
+         8   -> osDelay
+       8   Start_Navigation_Task
+         8   -> osDelay
+      16   Start_TimeBase_Task
+        16   -> Get_Battery_Voltage
+        16   -> HAL_GPIO_TogglePin
+        16   -> HAL_GPIO_WritePin
+        16   -> HAL_TIM_Base_Start_IT
+        16   -> PowerHandle
+        16   -> osDelay
+       0   vApplicationGetIdleTaskMemory
+       0   vApplicationGetTimerTaskMemory
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable24
+       4  ??DataTable24_1
+       4  ??DataTable24_2
+       4  ??DataTable24_3
+       4  ??DataTable24_4
+       4  ??DataTable24_5
+       4  ??DataTable24_6
+       4  ??DataTable24_7
+       4  ??DataTable24_8
+      16  ?_0
+      12  ?_1
+      28  ?_10
+      28  ?_11
+      28  ?_12
+      28  ?_13
+      28  ?_14
+      28  ?_15
+      28  ?_16
+      28  ?_17
+      28  ?_18
+      12  ?_2
+      12  ?_3
+      12  ?_4
+      12  ?_5
+      12  ?_6
+      16  ?_7
+      12  ?_8
+       8  ?_9
+       2  BUZZ
+       4  ElecAngle
+     210  MX_FREERTOS_Init
+      10  Start_ADC_Task
+      10  Start_BUZZ_Task
+      98  Start_CarSub_Task
+      10  Start_Foc_Task
+      52  Start_IMU_Task
+      10  Start_LED_Task
+      10  Start_Menu_Task
+      10  Start_Navigation_Task
+     116  Start_TimeBase_Task
+      40  TimeBase_TaskHandle
+          LED_TaskHandle
+          ADC_TaskHandle
+          BUZZ_TaskHandle
+          Menu_TaskHandle
+          IMU_TaskHandle
+          CarSub_TaskHandle
+          Navigation_TaskHandle
+          Foc_TaskHandle
+          SPI_MutexHandle
+       4  angle1
+      16  vApplicationGetIdleTaskMemory
+      18  vApplicationGetTimerTaskMemory
+     596  xIdleTaskTCBBuffer
+          xIdleStack
+    1108  xTimerTaskTCBBuffer
+          xTimerStack
+
+ 
+ 1 752 bytes in section .bss
+   116 bytes in section .rodata
+   868 bytes in section .text
+ 
+   868 bytes of CODE  memory
+   116 bytes of CONST memory
+ 1 752 bytes of DATA  memory
+
+Errors: none
+Warnings: none

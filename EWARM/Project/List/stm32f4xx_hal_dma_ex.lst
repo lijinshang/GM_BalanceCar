@@ -1,0 +1,411 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:40
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW1B3D.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\stm32f4xx_hal_dma_ex.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\stm32f4xx_hal_dma_ex.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_dma_ex.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm32f4xx_hal_dma_ex.c
+      4            * @author  MCD Application Team
+      5            * @brief   DMA Extension HAL module driver
+      6            *         This file provides firmware functions to manage the following 
+      7            *         functionalities of the DMA Extension peripheral:
+      8            *           + Extended features functions
+      9            *
+     10            @verbatim
+     11            ==============================================================================
+     12                                  ##### How to use this driver #####
+     13            ==============================================================================
+     14            [..]
+     15            The DMA Extension HAL driver can be used as follows:
+     16             (#) Start a multi buffer transfer using the HAL_DMA_MultiBufferStart() function
+     17                 for polling mode or HAL_DMA_MultiBufferStart_IT() for interrupt mode.
+     18                             
+     19               -@-  In Memory-to-Memory transfer mode, Multi (Double) Buffer mode is not allowed.
+     20               -@-  When Multi (Double) Buffer mode is enabled the, transfer is circular by default.
+     21               -@-  In Multi (Double) buffer mode, it is possible to update the base address for 
+     22                    the AHB memory port on the fly (DMA_SxM0AR or DMA_SxM1AR) when the stream is enabled. 
+     23            
+     24            @endverbatim
+     25            ******************************************************************************
+     26            * @attention
+     27            *
+     28            * Copyright (c) 2017 STMicroelectronics.
+     29            * All rights reserved.
+     30            *
+     31            * This software is licensed under terms that can be found in the LICENSE file in
+     32            * the root directory of this software component.
+     33            * If no LICENSE file comes with this software, it is provided AS-IS.
+     34            *
+     35            ******************************************************************************
+     36            */
+     37          
+     38          /* Includes ------------------------------------------------------------------*/
+     39          #include "stm32f4xx_hal.h"
+     40          
+     41          /** @addtogroup STM32F4xx_HAL_Driver
+     42            * @{
+     43            */
+     44          
+     45          /** @defgroup DMAEx DMAEx
+     46            * @brief DMA Extended HAL module driver
+     47            * @{
+     48            */
+     49          
+     50          #ifdef HAL_DMA_MODULE_ENABLED
+     51          
+     52          /* Private types -------------------------------------------------------------*/
+     53          /* Private variables ---------------------------------------------------------*/
+     54          /* Private Constants ---------------------------------------------------------*/
+     55          /* Private macros ------------------------------------------------------------*/
+     56          /* Private functions ---------------------------------------------------------*/
+     57          /** @addtogroup DMAEx_Private_Functions
+     58            * @{
+     59            */
+     60          static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength);
+     61          /**
+     62            * @}
+     63            */
+     64          
+     65          /* Exported functions ---------------------------------------------------------*/
+     66          
+     67          /** @addtogroup DMAEx_Exported_Functions
+     68            * @{
+     69            */
+     70          
+     71          
+     72          /** @addtogroup DMAEx_Exported_Functions_Group1
+     73            *
+     74          @verbatim   
+     75           ===============================================================================
+     76                          #####  Extended features functions  #####
+     77           ===============================================================================  
+     78              [..]  This section provides functions allowing to:
+     79                (+) Configure the source, destination address and data length and 
+     80                    Start MultiBuffer DMA transfer
+     81                (+) Configure the source, destination address and data length and 
+     82                    Start MultiBuffer DMA transfer with interrupt
+     83                (+) Change on the fly the memory0 or memory1 address.
+     84                
+     85          @endverbatim
+     86            * @{
+     87            */
+     88          
+     89          
+     90          /**
+     91            * @brief  Starts the multi_buffer DMA Transfer.
+     92            * @param  hdma       pointer to a DMA_HandleTypeDef structure that contains
+     93            *                     the configuration information for the specified DMA Stream.  
+     94            * @param  SrcAddress The source memory Buffer address
+     95            * @param  DstAddress The destination memory Buffer address
+     96            * @param  SecondMemAddress The second memory Buffer address in case of multi buffer Transfer  
+     97            * @param  DataLength The length of data to be transferred from source to destination
+     98            * @retval HAL status
+     99            */
+    100          HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength)
+    101          {
+    102            HAL_StatusTypeDef status = HAL_OK;
+    103            
+    104            /* Check the parameters */
+    105            assert_param(IS_DMA_BUFFER_SIZE(DataLength));
+    106            
+    107            /* Memory-to-memory transfer not supported in double buffering mode */
+    108            if (hdma->Init.Direction == DMA_MEMORY_TO_MEMORY)
+    109            {
+    110              hdma->ErrorCode = HAL_DMA_ERROR_NOT_SUPPORTED;
+    111              status = HAL_ERROR;
+    112            }
+    113            else
+    114            {
+    115              /* Process Locked */
+    116              __HAL_LOCK(hdma);
+    117              
+    118              if(HAL_DMA_STATE_READY == hdma->State)
+    119              {
+    120                /* Change DMA peripheral state */
+    121                hdma->State = HAL_DMA_STATE_BUSY; 
+    122                
+    123                /* Enable the double buffer mode */
+    124                hdma->Instance->CR |= (uint32_t)DMA_SxCR_DBM;
+    125                
+    126                /* Configure DMA Stream destination address */
+    127                hdma->Instance->M1AR = SecondMemAddress;
+    128                
+    129                /* Configure the source, destination address and the data length */
+    130                DMA_MultiBufferSetConfig(hdma, SrcAddress, DstAddress, DataLength);
+    131                
+    132                /* Enable the peripheral */
+    133                __HAL_DMA_ENABLE(hdma);
+    134              }
+    135              else
+    136              {
+    137                /* Return error status */
+    138                status = HAL_BUSY;
+    139              }
+    140            }
+    141            return status;
+    142          }
+    143          
+    144          /**
+    145            * @brief  Starts the multi_buffer DMA Transfer with interrupt enabled.
+    146            * @param  hdma       pointer to a DMA_HandleTypeDef structure that contains
+    147            *                     the configuration information for the specified DMA Stream.  
+    148            * @param  SrcAddress The source memory Buffer address
+    149            * @param  DstAddress The destination memory Buffer address
+    150            * @param  SecondMemAddress The second memory Buffer address in case of multi buffer Transfer  
+    151            * @param  DataLength The length of data to be transferred from source to destination
+    152            * @retval HAL status
+    153            */
+    154          HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart_IT(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength)
+    155          {
+    156            HAL_StatusTypeDef status = HAL_OK;
+    157            
+    158            /* Check the parameters */
+    159            assert_param(IS_DMA_BUFFER_SIZE(DataLength));
+    160            
+    161            /* Memory-to-memory transfer not supported in double buffering mode */
+    162            if (hdma->Init.Direction == DMA_MEMORY_TO_MEMORY)
+    163            {
+    164              hdma->ErrorCode = HAL_DMA_ERROR_NOT_SUPPORTED;
+    165              return HAL_ERROR;
+    166            }
+    167            
+    168            /* Check callback functions */
+    169            if ((NULL == hdma->XferCpltCallback) || (NULL == hdma->XferM1CpltCallback) || (NULL == hdma->XferErrorCallback))
+    170            {
+    171              hdma->ErrorCode = HAL_DMA_ERROR_PARAM;
+    172              return HAL_ERROR;
+    173            }
+    174            
+    175            /* Process locked */
+    176            __HAL_LOCK(hdma);
+    177            
+    178            if(HAL_DMA_STATE_READY == hdma->State)
+    179            {
+    180              /* Change DMA peripheral state */
+    181              hdma->State = HAL_DMA_STATE_BUSY;
+    182              
+    183              /* Initialize the error code */
+    184              hdma->ErrorCode = HAL_DMA_ERROR_NONE;
+    185              
+    186              /* Enable the Double buffer mode */
+    187              hdma->Instance->CR |= (uint32_t)DMA_SxCR_DBM;
+    188              
+    189              /* Configure DMA Stream destination address */
+    190              hdma->Instance->M1AR = SecondMemAddress;
+    191              
+    192              /* Configure the source, destination address and the data length */
+    193              DMA_MultiBufferSetConfig(hdma, SrcAddress, DstAddress, DataLength); 
+    194              
+    195              /* Clear all flags */
+    196              __HAL_DMA_CLEAR_FLAG (hdma, __HAL_DMA_GET_TC_FLAG_INDEX(hdma));
+    197              __HAL_DMA_CLEAR_FLAG (hdma, __HAL_DMA_GET_HT_FLAG_INDEX(hdma));
+    198              __HAL_DMA_CLEAR_FLAG (hdma, __HAL_DMA_GET_TE_FLAG_INDEX(hdma));
+    199              __HAL_DMA_CLEAR_FLAG (hdma, __HAL_DMA_GET_DME_FLAG_INDEX(hdma));
+    200              __HAL_DMA_CLEAR_FLAG (hdma, __HAL_DMA_GET_FE_FLAG_INDEX(hdma));
+    201          
+    202              /* Enable Common interrupts*/
+    203              hdma->Instance->CR  |= DMA_IT_TC | DMA_IT_TE | DMA_IT_DME;
+    204              hdma->Instance->FCR |= DMA_IT_FE;
+    205              
+    206              if((hdma->XferHalfCpltCallback != NULL) || (hdma->XferM1HalfCpltCallback != NULL))
+    207              {
+    208                hdma->Instance->CR  |= DMA_IT_HT;
+    209              }
+    210              
+    211              /* Enable the peripheral */
+    212              __HAL_DMA_ENABLE(hdma); 
+    213            }
+    214            else
+    215            {     
+    216              /* Process unlocked */
+    217              __HAL_UNLOCK(hdma);	  
+    218              
+    219              /* Return error status */
+    220              status = HAL_BUSY;
+    221            }  
+    222            return status; 
+    223          }
+    224          
+    225          /**
+    226            * @brief  Change the memory0 or memory1 address on the fly.
+    227            * @param  hdma       pointer to a DMA_HandleTypeDef structure that contains
+    228            *                     the configuration information for the specified DMA Stream.  
+    229            * @param  Address    The new address
+    230            * @param  memory     the memory to be changed, This parameter can be one of 
+    231            *                     the following values:
+    232            *                      MEMORY0 /
+    233            *                      MEMORY1
+    234            * @note   The MEMORY0 address can be changed only when the current transfer use
+    235            *         MEMORY1 and the MEMORY1 address can be changed only when the current 
+    236            *         transfer use MEMORY0.
+    237            * @retval HAL status
+    238            */
+    239          HAL_StatusTypeDef HAL_DMAEx_ChangeMemory(DMA_HandleTypeDef *hdma, uint32_t Address, HAL_DMA_MemoryTypeDef memory)
+    240          {
+    241            if(memory == MEMORY0)
+    242            {
+    243              /* change the memory0 address */
+    244              hdma->Instance->M0AR = Address;
+    245            }
+    246            else
+    247            {
+    248              /* change the memory1 address */
+    249              hdma->Instance->M1AR = Address;
+    250            }
+    251          
+    252            return HAL_OK;
+    253          }
+    254          
+    255          /**
+    256            * @}
+    257            */
+    258          
+    259          /**
+    260            * @}
+    261            */
+    262          
+    263          /** @addtogroup DMAEx_Private_Functions
+    264            * @{
+    265            */
+    266          
+    267          /**
+    268            * @brief  Set the DMA Transfer parameter.
+    269            * @param  hdma       pointer to a DMA_HandleTypeDef structure that contains
+    270            *                     the configuration information for the specified DMA Stream.  
+    271            * @param  SrcAddress The source memory Buffer address
+    272            * @param  DstAddress The destination memory Buffer address
+    273            * @param  DataLength The length of data to be transferred from source to destination
+    274            * @retval HAL status
+    275            */
+    276          static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength)
+    277          {  
+    278            /* Configure DMA Stream data length */
+    279            hdma->Instance->NDTR = DataLength;
+    280            
+    281            /* Peripheral to Memory */
+    282            if((hdma->Init.Direction) == DMA_MEMORY_TO_PERIPH)
+    283            {   
+    284              /* Configure DMA Stream destination address */
+    285              hdma->Instance->PAR = DstAddress;
+    286              
+    287              /* Configure DMA Stream source address */
+    288              hdma->Instance->M0AR = SrcAddress;
+    289            }
+    290            /* Memory to Peripheral */
+    291            else
+    292            {
+    293              /* Configure DMA Stream source address */
+    294              hdma->Instance->PAR = SrcAddress;
+    295              
+    296              /* Configure DMA Stream destination address */
+    297              hdma->Instance->M0AR = DstAddress;
+    298            }
+    299          }
+    300          
+    301          /**
+    302            * @}
+    303            */
+    304          
+    305          #endif /* HAL_DMA_MODULE_ENABLED */
+    306          /**
+    307            * @}
+    308            */
+    309          
+    310          /**
+    311            * @}
+    312            */
+    313          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       4   DMA_MultiBufferSetConfig
+       0   HAL_DMAEx_ChangeMemory
+      24   HAL_DMAEx_MultiBufferStart
+        24   -> DMA_MultiBufferSetConfig
+      24   HAL_DMAEx_MultiBufferStart_IT
+        24   -> DMA_MultiBufferSetConfig
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable1
+       4  ??DataTable1_1
+       4  ??DataTable1_10
+       4  ??DataTable1_11
+       4  ??DataTable1_12
+       4  ??DataTable1_13
+       4  ??DataTable1_14
+       4  ??DataTable1_15
+       4  ??DataTable1_16
+       4  ??DataTable1_2
+       4  ??DataTable1_3
+       4  ??DataTable1_4
+       4  ??DataTable1_5
+       4  ??DataTable1_6
+       4  ??DataTable1_7
+       4  ??DataTable1_8
+       4  ??DataTable1_9
+      32  DMA_MultiBufferSetConfig
+      16  HAL_DMAEx_ChangeMemory
+      92  HAL_DMAEx_MultiBufferStart
+    1230  HAL_DMAEx_MultiBufferStart_IT
+
+ 
+ 1 438 bytes in section .text
+ 
+ 1 438 bytes of CODE memory
+
+Errors: none
+Warnings: none

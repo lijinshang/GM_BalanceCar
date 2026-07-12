@@ -1,0 +1,1056 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:38
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\IMU\mpu6xxx.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW10AF.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\IMU\mpu6xxx.c" -D
+#        USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\mpu6xxx.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\mpu6xxx.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\IMU\mpu6xxx.c
+      1          /*****************************************************************************
+      2          程序名称：MPU6XXX驱动
+      3          程 序 员：李锦上 Email：lijinshang@126.com
+      4          使用说明：
+      5          #define MPU_USING_I2C
+      6          //#define MPU_USING_SPI
+      7          
+      8          mpu6xxx.i2c_addr = MPU6050_I2C_ADDR;
+      9          mpu6xxx_init(&mpu6xxx);
+     10          mpu6xxx_get_data(&mpu6xxx);
+     11          mpu6xxx_get_calc(&mpu6xxx);
+     12          
+     13          修改历史：
+     14          2025-3-19：修复I2C初始化后立即初始化MPU导致错误的问题
+     15          2023-7-11：使用标准g和度/秒为单位
+     16          2023-6-3：MPU6500 I2C通信调试完成
+     17          2022-6-17：MPU6000 SPI通信调试完成
+     18          2022-6-15：移植于RT-Thread
+     19          ******************************************************************************/
+     20          #include "main.h"
+     21          #include "i2c.h"
+     22          
+     23          #include <string.h>
+     24          #include <stdlib.h>
+     25          #include <math.h>
+     26          
+     27          #include "mpu6xxx.h"
+     28          #include "mpu6xxx_reg.h"
+     29          #include "IMU_DataFusion.h"
+     30          
+     31          #ifdef PKG_USING_MPU6XXX_MAG
+     32          #include "ak8963_reg.h"
+     33          #endif
+     34          
+     35          #define RAD_TO_DEG				57.295779513082320876798154814105
+     36          #define DEG_TO_RAD				0.01745329251994329576923690768489
+     37          #define PI						3.14159265358979323846
+     38          
+     39          #define MPU6XXX_ACCEL_SEN		((float)32768/(4))	//MPU6XXX_ACCEL_RANGE_4G
+     40          #define MPU6XXX_GYRO_SEN		((float)32768/(250))	//MPU6XXX_GYRO_RANGE_250DPS
+     41          
+     42          #define MPU60X0_TEMP_SEN		(340)
+     43          #define MPU60X0_TEMP_OFFSET		(36.5)
+     44          
+     45          #define MPU6500_TEMP_SEN		(333.87)
+     46          #define MPU6500_TEMP_OFFSET		(21)
+     47          
+     48          // MAG
+     49          #define AK8963_RANGE			(4912)
+     50          #define AK8963_FULLSCALE		(32760)
+     51          
+     52          
+     53          mpu6xxx_device mpu6xxx = NULL;
+     54          
+     55          
+     56          #ifdef MPU_USING_SPI
+     57          /*********************************************************************************************
+     58          函数名：SPI发送接收函数
+     59          参  数：send_buf:发送缓冲 send_length:发送长度
+     60          		recv_buf:接收缓冲 recv_length:接收长度
+     61          返回值：res:MPU_OK
+     62          **********************************************************************************************/
+     63          int8_t spi_send_then_recv(uint8_t *send_buf, uint8_t send_length, uint8_t *recv_buf, uint8_t recv_length)
+     64          {
+     65          	int8_t res = MPU_OK;
+     66          	uint16_t i;
+     67          
+     68          	MPU_CS_WRITE(0);
+     69          
+     70          	for(i=0; i<send_length; i++)
+     71          	{
+     72          		SPI3_ReadWriteByte(*send_buf);
+     73          		send_buf++;
+     74          	}
+     75          	for(i=0; i<recv_length; i++)
+     76          	{
+     77          		*recv_buf = SPI3_ReadWriteByte(0x00);
+     78          		recv_buf++;
+     79          	}
+     80          	MPU_CS_WRITE(1);
+     81          
+     82          	return res;
+     83          }
+     84          /*********************************************************************************************
+     85          函数名：SPI连续两次发送函数
+     86          参  数：send_buf1:发送缓冲1 send_length1:发送长度1
+     87          		send_buf2:发送缓冲2 send_length2:发送长度2
+     88          返回值：res:MPU_OK
+     89          **********************************************************************************************/
+     90          int8_t spi_send_then_send(uint8_t *send_buf1, uint8_t send_length1, uint8_t *send_buf2, uint8_t send_length2)
+     91          {
+     92          	int8_t res = MPU_OK;
+     93          	uint16_t i;
+     94          
+     95          	MPU_CS_WRITE(0);
+     96          
+     97          	for(i=0; i<send_length1; i++)
+     98          	{
+     99          		SPI3_ReadWriteByte(*send_buf1);
+    100          		send_buf1++;
+    101          	}
+    102          	for(i=0; i<send_length2; i++)
+    103          	{
+    104          		SPI3_ReadWriteByte(*send_buf2);
+    105          		send_buf2++;
+    106          	}
+    107          	MPU_CS_WRITE(1);
+    108          
+    109          //	spi_send_then_recv(send_buf1,send_length1,NULL,0);
+    110          //	spi_send_then_recv(send_buf2,send_length2,NULL,0);
+    111          	return res;
+    112          }
+    113          #endif
+    114          
+    115          /**
+    116           * This function writes the value of the register for mpu6xxx
+    117           *
+    118           * @param dev the pointer of device driver structure
+    119           * @param reg the register for mpu6xxx
+    120           * @param data value to write
+    121           *
+    122           * @return the writing status, MPU_OK reprensents  writing the value of the register successfully.
+    123           */
+    124          static int8_t mpu6xxx_write_reg(mpu6xxx_device *dev, uint8_t reg, uint8_t data)
+    125          {
+    126          	int8_t res = 0;
+    127          #ifdef MPU_USING_I2C
+    128          
+    129          	I2C1_WriteByte(dev->i2c_addr, reg, &data, 1);
+    130          
+    131          #endif
+    132          #ifdef MPU_USING_SPI
+    133          	res = spi_send_then_send(&reg, 1, &data, 1);
+    134          #endif
+    135          	return res;
+    136          }
+    137          
+    138          /**
+    139           * This function reads the value of registers for mpu6xxx
+    140           *
+    141           * @param dev the pointer of device driver structure
+    142           * @param reg the register for mpu6xxx
+    143           * @param len number of register
+    144           * @param buf read data pointer
+    145           *
+    146           * @return the reading status, MPU_OK reprensents  reading the value of registers successfully.
+    147           */
+    148          static int8_t mpu6xxx_read_regs(mpu6xxx_device *dev, uint8_t reg, uint8_t len, uint8_t *buf)
+    149          {
+    150          	int8_t res = 0;
+    151          
+    152          #ifdef MPU_USING_SPI
+    153          	uint8_t tmp;
+    154          #endif
+    155          #ifdef MPU_USING_I2C
+    156          
+    157          	I2C1_ReadByte(dev->i2c_addr, reg, buf, len);
+    158          #endif
+    159          #ifdef MPU_USING_SPI
+    160          	//The first bit of the first byte contains the Read/Write bit and indicates the Read (1) or Write (0) operation.
+    161          	tmp = reg | 0x80;
+    162          
+    163          	res = spi_send_then_recv(&tmp, 1, buf, len);
+    164          #endif
+    165          	return res;
+    166          }
+    167          
+    168          /**
+    169           * This function writes a bit value of registers for mpu6xxx
+    170           *
+    171           * @param dev the pointer of device driver structure
+    172           * @param reg the register for mpu6xxx
+    173           * @param bit the position of the register
+    174           * @param data value to write
+    175           *
+    176           * @return the writing status, MPU_OK reprensents  writing a bit value of registers successfully.
+    177           */
+    178          static int8_t mpu6xxx_write_bit(mpu6xxx_device *dev, uint8_t reg, uint8_t bit, uint8_t data)
+    179          {
+    180          	uint8_t byte;
+    181          	int8_t res;
+    182          
+    183          	res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    184          	if (res != MPU_OK)
+    185          	{
+    186          		return res;
+    187          	}
+    188          
+    189          	byte = (data != 0) ? (byte | (1 << bit)) : (byte & ~(1 << bit));
+    190          
+    191          	return mpu6xxx_write_reg(dev, reg, byte);
+    192          }
+    193          
+    194          /**
+    195           * This function reads a bit value of registers for mpu6xxx
+    196           *
+    197           * @param dev the pointer of device driver structure
+    198           * @param reg the register for mpu6xxx
+    199           * @param bit the position of the register
+    200           * @param data read data pointer
+    201           *
+    202           * @return the reading status, MPU_OK reprensents  reading a bit value of registers successfully.
+    203           */
+    204          static int8_t mpu6xxx_read_bit(mpu6xxx_device *dev, uint8_t reg, uint8_t bit, uint8_t *data)
+    205          {
+    206          	uint8_t byte;
+    207          	int8_t res;
+    208          
+    209          	res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    210          	if (res != MPU_OK)
+    211          	{
+    212          		return res;
+    213          	}
+    214          
+    215          	*data = byte & (1 << bit);
+    216          
+    217          	return MPU_OK;
+    218          }
+    219          
+    220          /**
+    221           * This function writes multi-bit value of registers for mpu6xxx
+    222           *
+    223           * @param dev the pointer of device driver structure
+    224           * @param reg the register for mpu6xxx
+    225           * @param stabit the start position of the register
+    226           * @param len number of bits to write
+    227           * @param data value to write
+    228           *
+    229           * @return the writing status, MPU_OK reprensents  writing multi-bit value of registers successfully.
+    230           */
+    231          static int8_t mpu6xxx_write_bits(mpu6xxx_device *dev, uint8_t reg, uint8_t stabit, uint8_t len, uint8_t data)
+    232          {
+    233          	uint8_t byte, mask;
+    234          	int8_t res;
+    235          
+    236          	res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    237          	if (res != MPU_OK)
+    238          	{
+    239          		return res;
+    240          	}
+    241          
+    242          	mask = ((1 << len) - 1) << (stabit - len + 1);
+    243          	data <<= (stabit - len + 1); // shift data into correct position
+    244          	data &= mask; // zero all non-important bits in data
+    245          	byte &= ~(mask); // zero all important bits in existing byte
+    246          	byte |= data; // combine data with existing byte
+    247          
+    248          	return mpu6xxx_write_reg(dev, reg, byte);
+    249          }
+    250          
+    251          /**
+    252           * This function reads multi-bit value of registers for mpu6xxx
+    253           *
+    254           * @param dev the pointer of device driver structure
+    255           * @param reg the register for mpu6xxx
+    256           * @param stabit the start position of the register
+    257           * @param len number of bits to write
+    258           * @param data read data pointer
+    259           *
+    260           * @return the reading status, MPU_OK reprensents  reading multi-bit value of registers successfully.
+    261           */
+    262          static int8_t mpu6xxx_read_bits(mpu6xxx_device *dev, uint8_t reg, uint8_t stabit, uint8_t len, uint8_t *data)
+    263          {
+    264          	uint8_t byte, mask;
+    265          	int8_t res;
+    266          
+    267          	res = mpu6xxx_read_regs(dev, reg, 1, &byte);
+    268          	if (res != MPU_OK)
+    269          	{
+    270          		return res;
+    271          	}
+    272          
+    273          	mask = ((1 << len) - 1) << (stabit - len + 1);
+    274          	byte &= mask;
+    275          	byte >>= (stabit - len + 1);
+    276          	*data = byte;
+    277          
+    278          	return MPU_OK;
+    279          }
+    280          
+    281          // MAG
+    282          #ifdef PKG_USING_MPU6XXX_MAG
+    283          
+    284          #define MAG_READ_DELAY_TIME         50
+    285          
+    286          static void mpu92_mag_write_reg(mpu6xxx_device *dev, uint8_t addr, uint8_t data)
+    287          {
+    288          	uint8_t  status = 0;
+    289          	uint32_t timeout = MAG_READ_DELAY_TIME;
+    290          
+    291          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_ADDR, AK8963_I2C_ADDR);
+    292          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_REG, addr);
+    293          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_DO, data);
+    294          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_CTRL, MPU6500_I2C_SLVx_EN);
+    295          
+    296          	do
+    297          	{
+    298          		mpu6xxx_read_regs(dev, MPU6XXX_RA_I2C_MST_STATUS, 1, &status);
+    299          		osDelay(1);
+    300          	}
+    301          	while (((status & MPU6500_I2C_SLV4_DONE) == 0) && (timeout--));
+    302          
+    303          }
+    304          
+    305          #endif // PKG_USING_MPU6XXX_MAG
+    306          
+    307          /**
+    308           * This function gets the raw data of the accelerometer
+    309           *
+    310           * @param dev the pointer of device driver structure
+    311           * @param accel the pointer of 3axes structure for receive data
+    312           *
+    313           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    314           */
+    315          static int8_t mpu6xxx_get_accel_raw(mpu6xxx_device *dev, mpu6xxx_3axes *accel)
+    316          {
+    317          	uint8_t buffer[6];
+    318          	int8_t res;
+    319          
+    320          	res = mpu6xxx_read_regs(dev, MPU6XXX_RA_ACCEL_XOUT_H, 6, buffer);
+    321          	if (res != MPU_OK)
+    322          	{
+    323          		return res;
+    324          	}
+    325          
+    326          	accel->x = ((uint16_t)buffer[0] << 8) + buffer[1];
+    327          	accel->y = ((uint16_t)buffer[2] << 8) + buffer[3];
+    328          	accel->z = ((uint16_t)buffer[4] << 8) + buffer[5];
+    329          
+    330          	return MPU_OK;
+    331          }
+    332          
+    333          /**
+    334           * This function gets the raw data of the gyroscope
+    335           *
+    336           * @param dev the pointer of device driver structure
+    337           * @param gyro the pointer of 3axes structure for receive data
+    338           *
+    339           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    340           */
+    341          static int8_t mpu6xxx_get_gyro_raw(mpu6xxx_device *dev, mpu6xxx_3axes *gyro)
+    342          {
+    343          	uint8_t buffer[6];
+    344          	int8_t res;
+    345          
+    346          	res = mpu6xxx_read_regs(dev, MPU6XXX_RA_GYRO_XOUT_H, 6, buffer);
+    347          	if (res != MPU_OK)
+    348          	{
+    349          		return res;
+    350          	}
+    351          
+    352          	gyro->x = ((uint16_t)buffer[0] << 8) + buffer[1];
+    353          	gyro->y = ((uint16_t)buffer[2] << 8) + buffer[3];
+    354          	gyro->z = ((uint16_t)buffer[4] << 8) + buffer[5];
+    355          
+    356          	return MPU_OK;
+    357          }
+    358          
+    359          #ifdef PKG_USING_MPU6XXX_MAG
+    360          /**
+    361           * This function gets the raw data of the magnetometer
+    362           *
+    363           * @param dev the pointer of device driver structure
+    364           * @param mag the pointer of 3axes structure for receive data
+    365           *
+    366           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    367           */
+    368          static int8_t mpu6xxx_get_mag_raw(mpu6xxx_device *dev, mpu6xxx_3axes *mag)
+    369          {
+    370          	uint8_t buffer[8];
+    371          	int8_t res;
+    372          
+    373          	res = mpu6xxx_read_regs(dev, MPU6XXX_RA_EXT_SENS_DATA_00, 8, buffer);
+    374          	if (res != MPU_OK)
+    375          	{
+    376          		return res;
+    377          	}
+    378          
+    379          	mag->x = ((uint16_t)buffer[2] << 8) + buffer[1];
+    380          	mag->y = ((uint16_t)buffer[4] << 8) + buffer[3];
+    381          	mag->z = ((uint16_t)buffer[6] << 8) + buffer[5];
+    382          
+    383          	return MPU_OK;
+    384          }
+    385          #endif
+    386          
+    387          /**
+    388           * This function gets the raw data of the temperature
+    389           *
+    390           * @param dev the pointer of device driver structure
+    391           * @param temp read data pointer
+    392           *
+    393           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    394           */
+    395          static int8_t mpu6xxx_get_temp_raw(mpu6xxx_device *dev, int16_t *temp)
+    396          {
+    397          	uint8_t buffer[2];
+    398          	int8_t res;
+    399          
+    400          	res = mpu6xxx_read_regs(dev, MPU6XXX_RA_TEMP_OUT_H, 2, buffer);
+    401          	if (res != MPU_OK)
+    402          	{
+    403          		return res;
+    404          	}
+    405          
+    406          	*temp = ((uint16_t)buffer[0] << 8) + buffer[1];
+    407          
+    408          	return MPU_OK;
+    409          }
+    410          
+    411          /**
+    412           * This function gets mpu6xxx parameters.
+    413           *
+    414           * @param dev the pointer of device driver structure
+    415           * @param cmd Configuration item
+    416           * @param param read data pointer
+    417           *
+    418           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    419           */
+    420          int8_t mpu6xxx_get_param(mpu6xxx_device *dev, enum mpu6xxx_cmd cmd, uint16_t *param)
+    421          {
+    422          	uint8_t data = 0;
+    423          	int8_t res = MPU_OK;
+    424          
+    425          	switch (cmd)
+    426          	{
+    427          	case MPU6XXX_GYRO_RANGE:  /* Gyroscope full scale range */
+    428          		res = mpu6xxx_read_bits(dev, MPU6XXX_RA_GYRO_CONFIG, MPU6XXX_GCONFIG_FS_SEL_BIT, MPU6XXX_GCONFIG_FS_SEL_LENGTH, &data);
+    429          		*param = data;
+    430          		break;
+    431          	case MPU6XXX_ACCEL_RANGE: /* Accelerometer full scale range */
+    432          		res = mpu6xxx_read_bits(dev, MPU6XXX_RA_ACCEL_CONFIG, MPU6XXX_ACONFIG_AFS_SEL_BIT, MPU6XXX_ACONFIG_AFS_SEL_LENGTH, &data);
+    433          		*param = data;
+    434          		break;
+    435          	case MPU6XXX_DLPF_CONFIG: /* Digital Low Pass Filter */
+    436          		res = mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+    437          		*param = data;
+    438          		break;
+    439          	case MPU6XXX_SAMPLE_RATE: /* Sample Rate */
+    440          		/* Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV) */
+    441          		res = mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+    442          		if (res != MPU_OK)
+    443          		{
+    444          			break;
+    445          		}
+    446          
+    447          		if (data == 0 || data == 7) /* dlpf is disable */
+    448          		{
+    449          			res = mpu6xxx_read_regs(dev, MPU6XXX_RA_SMPLRT_DIV, 1, &data);
+    450          			*param = 8000 / (data + 1);
+    451          		}
+    452          		else /* dlpf is enable */
+    453          		{
+    454          			res = mpu6xxx_read_regs(dev, MPU6XXX_RA_SMPLRT_DIV, 1, &data);
+    455          			*param = 1000 / (data + 1);
+    456          		}
+    457          		break;
+    458          	case MPU6XXX_SLEEP: /* sleep mode */
+    459          		res = mpu6xxx_read_bit(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_SLEEP_BIT, &data);
+    460          		*param = data;
+    461          		break;
+    462          	}
+    463          
+    464          	return res;
+    465          }
+    466          
+    467          /**
+    468           * This function set mpu6xxx parameters.
+    469           *
+    470           * @param dev the pointer of device driver structure
+    471           * @param cmd Configuration item
+    472           * @param param Configuration item parameter
+    473           *
+    474           * @return the setting status, MPU_OK reprensents  setting the parameter successfully.
+    475           */
+    476          int8_t mpu6xxx_set_param(mpu6xxx_device *dev, enum mpu6xxx_cmd cmd, uint16_t param)
+    477          {
+    478          	uint8_t data = 0;
+    479          	int8_t res = MPU_OK;
+    480          
+    481          //    RT_ASSERT(dev);
+    482          
+    483          	switch (cmd)
+    484          	{
+    485          	case MPU6XXX_GYRO_RANGE:  /* Gyroscope full scale range */
+    486          		res = mpu6xxx_write_bits(dev, MPU6XXX_RA_GYRO_CONFIG, MPU6XXX_GCONFIG_FS_SEL_BIT, MPU6XXX_GCONFIG_FS_SEL_LENGTH, param);
+    487          		break;
+    488          	case MPU6XXX_ACCEL_RANGE: /* Accelerometer full scale range */
+    489          		res = mpu6xxx_write_bits(dev, MPU6XXX_RA_ACCEL_CONFIG, MPU6XXX_ACONFIG_AFS_SEL_BIT, MPU6XXX_ACONFIG_AFS_SEL_LENGTH, param);
+    490          		break;
+    491          	case MPU6XXX_DLPF_CONFIG: /* Digital Low Pass Filter */
+    492          		res = mpu6xxx_write_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, param);
+    493          		break;
+    494          	case MPU6XXX_SAMPLE_RATE: /* Sample Rate = 16-bit unsigned value.
+    495                                           Sample Rate = [1000 -  4]HZ when dlpf is enable
+    496                                           Sample Rate = [8000 - 32]HZ when dlpf is disable */
+    497          
+    498          		//Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
+    499          		res = mpu6xxx_read_bits(dev, MPU6XXX_RA_CONFIG, MPU6XXX_CFG_DLPF_CFG_BIT, MPU6XXX_CFG_DLPF_CFG_LENGTH, &data);
+    500          		if (res != MPU_OK)
+    501          		{
+    502          			break;
+    503          		}
+    504          
+    505          		if (data == 0 || data == 7) /* dlpf is disable */
+    506          		{
+    507          			if (param > 8000)
+    508          				data = 0;
+    509          			else if (param < 32)
+    510          				data = 0xFF;
+    511          			else
+    512          				data = 8000 / param - 1;
+    513          		}
+    514          		else /* dlpf is enable */
+    515          		{
+    516          			if (param > 1000)
+    517          				data = 0;
+    518          			else if (param < 4)
+    519          				data = 0xFF;
+    520          			else
+    521          				data = 1000 / param - 1;
+    522          		}
+    523          		res = mpu6xxx_write_reg(dev, MPU6XXX_RA_SMPLRT_DIV, data);
+    524          		break;
+    525          	case MPU6XXX_SLEEP: /* Configure sleep mode */
+    526          		res = mpu6xxx_write_bit(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_SLEEP_BIT, param);
+    527          		break;
+    528          	}
+    529          
+    530          	return res;
+    531          }
+    532          
+    533          /**
+    534           * This function gets the data of the accelerometer, unit: mg
+    535           *
+    536           * @param dev the pointer of device driver structure
+    537           * @param accel the pointer of 3axes structure for receive data
+    538           *
+    539           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    540           */
+    541          int8_t mpu6xxx_get_accel(mpu6xxx_device *dev)
+    542          {
+    543          	mpu6xxx_3axes tmp;
+    544          	int8_t res;
+    545          
+    546          	res = mpu6xxx_get_accel_raw(dev, &tmp);
+    547          	if (res != MPU_OK)
+    548          	{
+    549          		return res;
+    550          	}
+    551          
+    552          	//g（重力加速度单位，1g = 9.8 m/s2）
+    553          	dev->accel.x = (float)tmp.x / MPU6XXX_ACCEL_SEN;
+    554          	dev->accel.y = (float)tmp.y / MPU6XXX_ACCEL_SEN;
+    555          	dev->accel.z = (float)tmp.z / MPU6XXX_ACCEL_SEN;
+    556          
+    557          	return MPU_OK;
+    558          }
+    559          
+    560          /**
+    561           * This function gets the data of the gyroscope, unit: deg/10s
+    562           * Here deg/10s means 10 times higher precision than deg/s.
+    563           *
+    564           * @param dev the pointer of device driver structure
+    565           * @param gyro the pointer of 3axes structure for receive data
+    566           *
+    567           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    568           */
+    569          int8_t mpu6xxx_get_gyro(mpu6xxx_device *dev)
+    570          {
+    571          	mpu6xxx_3axes tmp;
+    572          	int8_t res;
+    573          
+    574          	res = mpu6xxx_get_gyro_raw(dev, &tmp);
+    575          	if (res != MPU_OK)
+    576          	{
+    577          		return res;
+    578          	}
+    579          
+    580          	// 单位：dps（度/秒）
+    581          	dev->gyro.x = (float)tmp.x / MPU6XXX_GYRO_SEN;
+    582          	dev->gyro.y = (float)tmp.y / MPU6XXX_GYRO_SEN;
+    583          	dev->gyro.z = (float)tmp.z / MPU6XXX_GYRO_SEN;
+    584          
+    585          	return MPU_OK;
+    586          }
+    587          
+    588          #ifdef PKG_USING_MPU6XXX_MAG
+    589          
+    590          /**
+    591           * This function gets the data of the magnetometer, unit: uT
+    592           *
+    593           * @param dev the pointer of device driver structure
+    594           * @param gyro the pointer of 3axes structure for receive data
+    595           *
+    596           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    597           */
+    598          int8_t mpu6xxx_get_mag(mpu6xxx_device *dev)
+    599          {
+    600          	mpu6xxx_3axes tmp;
+    601          	int8_t res;
+    602          
+    603          	res = mpu6xxx_get_mag_raw(dev, &tmp);
+    604          	if (res != MPU_OK)
+    605          	{
+    606          		return res;
+    607          	}
+    608          
+    609          	//单位：微特斯拉 (μT)
+    610          	dev->mag.x = ((int32_t)tmp.x * AK8963_RANGE) / AK8963_FULLSCALE;
+    611          	dev->mag.y = ((int32_t)tmp.y * AK8963_RANGE) / AK8963_FULLSCALE;
+    612          	dev->mag.z = ((int32_t)tmp.z * AK8963_RANGE) / AK8963_FULLSCALE;
+    613          
+    614          	return MPU_OK;
+    615          }
+    616          
+    617          #endif
+    618          
+    619          /**
+    620           * This function gets the data of the temperature, unit: Centigrade
+    621           *
+    622           * @param dev the pointer of device driver structure
+    623           * @param temp read data pointer
+    624           *
+    625           * @return the reading status, MPU_OK reprensents  reading the data successfully.
+    626           */
+    627          int8_t mpu6xxx_get_temp(mpu6xxx_device *dev)
+    628          {
+    629          	int16_t tmp;
+    630          	int8_t res;
+    631          
+    632          	res = mpu6xxx_get_temp_raw(dev, &tmp);
+    633          	if (res != MPU_OK)
+    634          	{
+    635          		return res;
+    636          	}
+    637          
+    638          	if (dev->id == MPU6050_WHO_AM_I)
+    639          	{
+    640          		/* mpu60x0: Temperature in degrees C = (TEMP_OUT Register Value as a signed quantity)/340 + 36.53 */
+    641          		dev->temp = (float)tmp / MPU60X0_TEMP_SEN + MPU60X0_TEMP_OFFSET;
+    642          	}
+    643          	else
+    644          	{
+    645          		/* mpu6500:  ((TEMP_OUT - RoomTemp_Offset)/Temp_Sensitivity)+ 21degC */
+    646          		dev->temp = (float)tmp / MPU6500_TEMP_SEN + MPU6500_TEMP_OFFSET;
+    647          	}
+    648          
+    649          	return MPU_OK;
+    650          }
+    651          
+    652          /**
+    653          * This function sets the offset of the accelerometer
+    654           *
+    655           * @param dev the pointer of device driver structure
+    656           * @param offset the pointer of 3axes structure of offsets
+    657           *
+    658           * @return the setting status, MPU_OK reprensents  setting the offsets successfully.
+    659           */
+    660          int8_t mpu6xxx_set_accel_offset(mpu6xxx_device *dev, mpu6xxx_3axes *offset)
+    661          {
+    662          	int8_t res=0;
+    663          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XA_OFFS_H, (offset->x)>>8);
+    664          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XA_OFFS_L_TC, (offset->x)&0x00ff);
+    665          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YA_OFFS_H, (offset->y)>>8);
+    666          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YA_OFFS_L_TC, (offset->y)&0x00ff);
+    667          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZA_OFFS_H, (offset->z)>>8);
+    668          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZA_OFFS_L_TC, (offset->z)&0x00ff);
+    669          	return res;
+    670          }
+    671          
+    672          /**
+    673          * This function gets the offset of the accelerometer
+    674           *
+    675           * @param dev the pointer of device driver structure
+    676           * @param offset the pointer of 3axes structure of offsets
+    677           *
+    678           * @return the setting status, MPU_OK reprensents  reading the offsets successfully.
+    679           */
+    680          int8_t mpu6xxx_get_accel_offset(mpu6xxx_device *dev, mpu6xxx_3axes *offset)
+    681          {
+    682          	uint8_t buffer[6];
+    683          	int8_t res;
+    684          
+    685          	res = mpu6xxx_read_regs(dev, MPU6XXX_RA_XA_OFFS_H, 6, buffer);
+    686          	if (res != MPU_OK)
+    687          	{
+    688          		return res;
+    689          	}
+    690          
+    691          	offset->x = ((uint16_t)buffer[0] << 8) + buffer[1];
+    692          	offset->y = ((uint16_t)buffer[2] << 8) + buffer[3];
+    693          	offset->z = ((uint16_t)buffer[4] << 8) + buffer[5];
+    694          
+    695          	return MPU_OK;
+    696          }
+    697          
+    698          /**
+    699          * This function sets the offset of the gyroscope
+    700           *
+    701           * @param dev the pointer of device driver structure
+    702           * @param offset the pointer of 3axes structure of offsets
+    703           *
+    704           * @return the setting status, MPU_OK reprensents  setting the offsets successfully.
+    705           */
+    706          int8_t mpu6xxx_set_gyro_offset(mpu6xxx_device *dev, mpu6xxx_3axes *offset)
+    707          {
+    708          	int8_t res=0;
+    709          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XG_OFFS_USRH, (offset->x)>>8);
+    710          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_XG_OFFS_USRL, (offset->x)&0x00ff);
+    711          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YG_OFFS_USRH, (offset->y)>>8);
+    712          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_YG_OFFS_USRL, (offset->y)&0x00ff);
+    713          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZG_OFFS_USRH, (offset->z)>>8);
+    714          	res |= mpu6xxx_write_reg(dev, MPU6XXX_RA_ZG_OFFS_USRL, (offset->z)&0x00ff);
+    715          	return res;
+    716          }
+    717          
+    718          /**
+    719          * This function gets the offset of the gyroscope
+    720           *
+    721           * @param dev the pointer of device driver structure
+    722           * @param offset the pointer of 3axes structure of offsets
+    723           *
+    724           * @return the setting status, MPU_OK reprensents  reading the offsets successfully.
+    725           */
+    726          int8_t mpu6xxx_get_gyro_offset(mpu6xxx_device *dev, mpu6xxx_3axes *offset)
+    727          {
+    728          	uint8_t buffer[6];
+    729          	int8_t res;
+    730          
+    731          	res = mpu6xxx_read_regs(dev, MPU6XXX_RA_XG_OFFS_USRH, 6, buffer);
+    732          	if (res != MPU_OK)
+    733          	{
+    734          		return res;
+    735          	}
+    736          
+    737          	offset->x = ((uint16_t)buffer[0] << 8) + buffer[1];
+    738          	offset->y = ((uint16_t)buffer[2] << 8) + buffer[3];
+    739          	offset->z = ((uint16_t)buffer[4] << 8) + buffer[5];
+    740          
+    741          	return MPU_OK;
+    742          }
+    743          
+    744          /**
+    745           * This function initialize the mpu6xxx device.
+    746           *
+    747           * @param dev_name the name of transfer device
+    748           * @param param the i2c device address for i2c communication, NULL for spi
+    749           *
+    750           * @return the pointer of device driver structure, NULL reprensents  initialization failed.
+    751           */
+    752          void mpu6xxx_init(mpu6xxx_device *dev)
+    753          {
+    754          	uint8_t reg = 0xFF, res = MPU_OK;
+    755          
+    756          	HAL_Delay(50);
+    757          	
+    758          	if (mpu6xxx_read_regs(dev, MPU6XXX_RA_WHO_AM_I, 1, &reg) != MPU_OK)
+    759          	{
+    760          //        LOG_E("Failed to read device id!");
+    761          		return;
+    762          	}
+    763          
+    764          	dev->id = reg;
+    765          
+    766          	switch (dev->id)
+    767          	{
+    768          	case MPU6050_WHO_AM_I:
+    769          //        LOG_I("Find device: mpu6050!");
+    770          		break;
+    771          	case MPU6500_WHO_AM_I:
+    772          //        LOG_I("Find device: mpu6500!");
+    773          		break;
+    774          	case MPU9250_WHO_AM_I:
+    775          //        LOG_I("Find device: mpu9250!");
+    776          		break;
+    777          	case ICM20608G_WHO_AM_I:
+    778          	case ICM20608D_WHO_AM_I:
+    779          //        LOG_I("Find device: icm20608!");
+    780          		break;
+    781          	case 0xFF:
+    782          //        LOG_E("No device connection!");
+    783          		return;
+    784          	default:
+    785          //        LOG_W("Unknown device id: 0x%x!", reg);
+    786          		mpu6xxx_write_reg(dev, MPU6XXX_RA_PWR_MGMT_1, 0x80); // 触发复位
+    787          		HAL_Delay(100);
+    788          		break;
+    789          	}
+    790          
+    791          	res += mpu6xxx_write_bits(dev, MPU6XXX_RA_PWR_MGMT_1, MPU6XXX_PWR1_CLKSEL_BIT, MPU6XXX_PWR1_CLKSEL_LENGTH, MPU6XXX_CLOCK_PLL_XGYRO);
+    792          	res += mpu6xxx_set_param(dev, MPU6XXX_ACCEL_RANGE, MPU6XXX_ACCEL_RANGE_4G);//加速度计量程配置 0.00012g
+    793          	res += mpu6xxx_set_param(dev, MPU6XXX_GYRO_RANGE, MPU6XXX_GYRO_RANGE_250DPS);//陀螺仪量程配置 0.06度
+    794          	res += mpu6xxx_set_param(dev, MPU6XXX_DLPF_CONFIG, MPU6XXX_DLPF_42HZ);//低通滤波
+    795          	res += mpu6xxx_set_param(dev, MPU6XXX_SAMPLE_RATE, 500);//采样频率 4-1000Hz 500Hz:2ms
+    796          	res += mpu6xxx_set_param(dev, MPU6XXX_SLEEP, MPU6XXX_SLEEP_DISABLE);
+    797          
+    798          #ifdef PKG_USING_MPU6XXX_MAG
+    799          	mpu6xxx_write_reg(dev, MPU6XXX_RA_USER_CTRL, 0x20);
+    800          	mpu92_mag_write_reg(dev, AK8963_REG_CNTL2, 0x01);      /* [0]  Reset Device                  */
+    801          	osDelay(1);
+    802          	mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x00);      /* [1]  Power-down mode               */
+    803          	mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x0F);      /* [2]  Fuse ROM access mode          */
+    804          	mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x00);      /* [3]  Power-down mode               */
+    805          	osDelay(1);    // 100us
+    806          	mpu92_mag_write_reg(dev, AK8963_REG_CNTL1, 0x16);      /* [4]  16bits and Continuous measurement mode 2 */
+    807          
+    808          	/* config mpu9250 i2c */
+    809          	osDelay(2);
+    810          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_MST_CTRL, 0x5D);
+    811          	osDelay(2);
+    812          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV0_ADDR, AK8963_I2C_ADDR | 0x80);
+    813          	osDelay(2);
+    814          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV0_REG, AK8963_REG_ST1);
+    815          	osDelay(2);
+    816          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV0_CTRL, MPU6500_I2C_SLVx_EN | 8);
+    817          	osDelay(2);
+    818          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_SLV4_CTRL, 0x09);
+    819          	osDelay(2);
+    820          	mpu6xxx_write_reg(dev, MPU6XXX_RA_I2C_MST_DELAY_CTRL, 0x81);
+    821          #endif
+    822          
+    823          	if (res == MPU_OK)
+    824          	{
+    825          //        LOG_I("Device init succeed!");
+    826          	}
+    827          	else
+    828          	{
+    829          //        LOG_W("Error in device initialization!");
+    830          	}
+    831          	return;
+    832          }
+    833          
+    834          //周期2-5ms
+    835          void mpu6xxx_get_data(mpu6xxx_device *dev)
+    836          {
+    837          	//读取参数
+    838          	{
+    839          
+    840          		if (dev == NULL)
+    841          		{
+    842          //            kprintf("Please probe mpu6xxx first!\n");
+    843          			return ;
+    844          		}
+    845          
+    846          		{
+    847          			mpu6xxx_get_accel(dev);
+    848          			mpu6xxx_get_gyro(dev);
+    849          #ifdef PKG_USING_MPU6XXX_MAG
+    850          			mpu6xxx_get_mag(dev);
+    851          #endif
+    852          			mpu6xxx_get_temp(dev);
+    853          
+    854          
+    855          		}
+    856          	}
+    857          }
+    858          
+    859          //周期2-5ms
+    860          int roll,pitch,yaw;
+    861          void mpu6xxx_get_calc(mpu6xxx_device *dev)
+    862          {
+    863          	mpu_3axes accel, gyro;
+    864          	mpu_3axes EulerAngles;
+    865          
+    866          	//单位：g
+    867          	accel.x = (float)dev->accel.x;
+    868          	accel.y = (float)dev->accel.y;
+    869          	accel.z = (float)dev->accel.z;
+    870          
+    871          	//单位：弧度/秒
+    872          	gyro.x = (float)dev->gyro.x*DEG_TO_RAD;
+    873          	gyro.y = (float)dev->gyro.y*DEG_TO_RAD;
+    874          	gyro.z = (float)dev->gyro.z*DEG_TO_RAD;
+    875          
+    876          	EulerAngles = IMU_AttitudeAlgorithm(accel, gyro);
+    877          
+    878          	dev->EulerAngles_Roll = EulerAngles.x;
+    879          	dev->EulerAngles_Pitch = EulerAngles.y;
+    880          	dev->EulerAngles_Yaw = EulerAngles.z;
+    881          
+    882          	roll = EulerAngles.x;
+    883          	pitch = EulerAngles.y;
+    884          	yaw = EulerAngles.z;
+    885          }
+    886          
+    887          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      16   mpu6xxx_get_accel
+        16   -> mpu6xxx_get_accel_raw
+      16   mpu6xxx_get_accel_offset
+        16   -> mpu6xxx_read_regs
+      16   mpu6xxx_get_accel_raw
+        16   -> mpu6xxx_read_regs
+      40   mpu6xxx_get_calc
+        40   -> IMU_AttitudeAlgorithm
+        40   -> __aeabi_d2f
+        40   -> __aeabi_dmul
+        40   -> __aeabi_f2d
+       8   mpu6xxx_get_data
+         8   -> mpu6xxx_get_accel
+         8   -> mpu6xxx_get_gyro
+         0   -> mpu6xxx_get_temp
+      16   mpu6xxx_get_gyro
+        16   -> mpu6xxx_get_gyro_raw
+      16   mpu6xxx_get_gyro_offset
+        16   -> mpu6xxx_read_regs
+      16   mpu6xxx_get_gyro_raw
+        16   -> mpu6xxx_read_regs
+      24   mpu6xxx_get_param
+        24   -> mpu6xxx_read_bit
+        24   -> mpu6xxx_read_bits
+        24   -> mpu6xxx_read_regs
+      16   mpu6xxx_get_temp
+        16   -> __aeabi_d2f
+        16   -> __aeabi_dadd
+        16   -> __aeabi_ddiv
+        16   -> __aeabi_f2d
+        16   -> mpu6xxx_get_temp_raw
+      16   mpu6xxx_get_temp_raw
+        16   -> mpu6xxx_read_regs
+      16   mpu6xxx_init
+        16   -> HAL_Delay
+        16   -> mpu6xxx_read_regs
+        16   -> mpu6xxx_set_param
+        16   -> mpu6xxx_write_bits
+        16   -> mpu6xxx_write_reg
+      16   mpu6xxx_read_bit
+        16   -> mpu6xxx_read_regs
+      16   mpu6xxx_read_bits
+        16   -> mpu6xxx_read_regs
+       8   mpu6xxx_read_regs
+         8   -> I2C1_ReadByte
+      16   mpu6xxx_set_accel_offset
+        16   -> mpu6xxx_write_reg
+      16   mpu6xxx_set_gyro_offset
+        16   -> mpu6xxx_write_reg
+      24   mpu6xxx_set_param
+        24   -> mpu6xxx_read_bits
+        24   -> mpu6xxx_write_bit
+        24   -> mpu6xxx_write_bits
+        24   -> mpu6xxx_write_reg
+      24   mpu6xxx_write_bit
+        24   -> mpu6xxx_read_regs
+        24   -> mpu6xxx_write_reg
+      24   mpu6xxx_write_bits
+        24   -> mpu6xxx_read_regs
+        24   -> mpu6xxx_write_reg
+       8   mpu6xxx_write_reg
+         8   -> I2C1_WriteByte
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable3
+       4  ??DataTable4
+       4  ??DataTable4_1
+       4  ??DataTable4_2
+       4  ??DataTable4_3
+       8  ??DataTable4_4
+       4  ??DataTable4_5
+       4  ??DataTable4_6
+       4  ??DataTable4_7
+      56  mpu6xxx
+      82  mpu6xxx_get_accel
+      62  mpu6xxx_get_accel_offset
+      62  mpu6xxx_get_accel_raw
+     186  mpu6xxx_get_calc
+      26  mpu6xxx_get_data
+      82  mpu6xxx_get_gyro
+      62  mpu6xxx_get_gyro_offset
+      62  mpu6xxx_get_gyro_raw
+     210  mpu6xxx_get_param
+      88  mpu6xxx_get_temp
+      36  mpu6xxx_get_temp_raw
+     144  mpu6xxx_init
+      36  mpu6xxx_read_bit
+      48  mpu6xxx_read_bits
+      18  mpu6xxx_read_regs
+     118  mpu6xxx_set_accel_offset
+     118  mpu6xxx_set_gyro_offset
+     216  mpu6xxx_set_param
+      66  mpu6xxx_write_bit
+      70  mpu6xxx_write_bits
+      16  mpu6xxx_write_reg
+      12  roll
+          pitch
+          yaw
+
+ 
+    68 bytes in section .bss
+ 1 848 bytes in section .text
+ 
+ 1 848 bytes of CODE memory
+    68 bytes of DATA memory
+
+Errors: none
+Warnings: 3

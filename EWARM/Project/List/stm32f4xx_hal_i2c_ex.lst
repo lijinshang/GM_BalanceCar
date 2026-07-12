@@ -1,0 +1,257 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:41
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c_ex.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW1E9F.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c_ex.c"
+#        -D USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\stm32f4xx_hal_i2c_ex.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\stm32f4xx_hal_i2c_ex.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_i2c_ex.c
+      1          /**
+      2            ******************************************************************************
+      3            * @file    stm32f4xx_hal_i2c_ex.c
+      4            * @author  MCD Application Team
+      5            * @brief   I2C Extension HAL module driver.
+      6            *          This file provides firmware functions to manage the following
+      7            *          functionalities of I2C extension peripheral:
+      8            *           + Extension features functions
+      9            *
+     10            ******************************************************************************
+     11            * @attention
+     12            *
+     13            * Copyright (c) 2016 STMicroelectronics.
+     14            * All rights reserved.
+     15            *
+     16            * This software is licensed under terms that can be found in the LICENSE file
+     17            * in the root directory of this software component.
+     18            * If no LICENSE file comes with this software, it is provided AS-IS.
+     19            *
+     20            ******************************************************************************
+     21            @verbatim
+     22            ==============================================================================
+     23                         ##### I2C peripheral extension features  #####
+     24            ==============================================================================
+     25          
+     26            [..] Comparing to other previous devices, the I2C interface for STM32F427xx/437xx/
+     27                 429xx/439xx devices contains the following additional features :
+     28          
+     29                 (+) Possibility to disable or enable Analog Noise Filter
+     30                 (+) Use of a configured Digital Noise Filter
+     31          
+     32                               ##### How to use this driver #####
+     33            ==============================================================================
+     34            [..] This driver provides functions to configure Noise Filter
+     35              (#) Configure I2C Analog noise filter using the function HAL_I2C_AnalogFilter_Config()
+     36              (#) Configure I2C Digital noise filter using the function HAL_I2C_DigitalFilter_Config()
+     37          
+     38            @endverbatim
+     39            */
+     40          
+     41          /* Includes ------------------------------------------------------------------*/
+     42          #include "stm32f4xx_hal.h"
+     43          
+     44          /** @addtogroup STM32F4xx_HAL_Driver
+     45            * @{
+     46            */
+     47          
+     48          /** @defgroup I2CEx I2CEx
+     49            * @brief I2C HAL module driver
+     50            * @{
+     51            */
+     52          
+     53          #ifdef HAL_I2C_MODULE_ENABLED
+     54          
+     55          #if  defined(I2C_FLTR_ANOFF)&&defined(I2C_FLTR_DNF)
+     56          /* Private typedef -----------------------------------------------------------*/
+     57          /* Private define ------------------------------------------------------------*/
+     58          /* Private macro -------------------------------------------------------------*/
+     59          /* Private variables ---------------------------------------------------------*/
+     60          /* Private function prototypes -----------------------------------------------*/
+     61          /* Exported functions --------------------------------------------------------*/
+     62          /** @defgroup I2CEx_Exported_Functions I2C Exported Functions
+     63            * @{
+     64            */
+     65          
+     66          
+     67          /** @defgroup I2CEx_Exported_Functions_Group1 Extension features functions
+     68           *  @brief   Extension features functions
+     69           *
+     70          @verbatim
+     71           ===============================================================================
+     72                                ##### Extension features functions #####
+     73           ===============================================================================
+     74              [..] This section provides functions allowing to:
+     75                (+) Configure Noise Filters
+     76          
+     77          @endverbatim
+     78            * @{
+     79            */
+     80          
+     81          /**
+     82            * @brief  Configures I2C Analog noise filter.
+     83            * @param  hi2c pointer to a I2C_HandleTypeDef structure that contains
+     84            *                the configuration information for the specified I2Cx peripheral.
+     85            * @param  AnalogFilter new state of the Analog filter.
+     86            * @retval HAL status
+     87            */
+     88          HAL_StatusTypeDef HAL_I2CEx_ConfigAnalogFilter(I2C_HandleTypeDef *hi2c, uint32_t AnalogFilter)
+     89          {
+     90            /* Check the parameters */
+     91            assert_param(IS_I2C_ALL_INSTANCE(hi2c->Instance));
+     92            assert_param(IS_I2C_ANALOG_FILTER(AnalogFilter));
+     93          
+     94            if (hi2c->State == HAL_I2C_STATE_READY)
+     95            {
+     96              hi2c->State = HAL_I2C_STATE_BUSY;
+     97          
+     98              /* Disable the selected I2C peripheral */
+     99              __HAL_I2C_DISABLE(hi2c);
+    100          
+    101              /* Reset I2Cx ANOFF bit */
+    102              hi2c->Instance->FLTR &= ~(I2C_FLTR_ANOFF);
+    103          
+    104              /* Disable the analog filter */
+    105              hi2c->Instance->FLTR |= AnalogFilter;
+    106          
+    107              __HAL_I2C_ENABLE(hi2c);
+    108          
+    109              hi2c->State = HAL_I2C_STATE_READY;
+    110          
+    111              return HAL_OK;
+    112            }
+    113            else
+    114            {
+    115              return HAL_BUSY;
+    116            }
+    117          }
+    118          
+    119          /**
+    120            * @brief  Configures I2C Digital noise filter.
+    121            * @param  hi2c pointer to a I2C_HandleTypeDef structure that contains
+    122            *                the configuration information for the specified I2Cx peripheral.
+    123            * @param  DigitalFilter Coefficient of digital noise filter between 0x00 and 0x0F.
+    124            * @retval HAL status
+    125            */
+    126          HAL_StatusTypeDef HAL_I2CEx_ConfigDigitalFilter(I2C_HandleTypeDef *hi2c, uint32_t DigitalFilter)
+    127          {
+    128            uint16_t tmpreg = 0;
+    129          
+    130            /* Check the parameters */
+    131            assert_param(IS_I2C_ALL_INSTANCE(hi2c->Instance));
+    132            assert_param(IS_I2C_DIGITAL_FILTER(DigitalFilter));
+    133          
+    134            if (hi2c->State == HAL_I2C_STATE_READY)
+    135            {
+    136              hi2c->State = HAL_I2C_STATE_BUSY;
+    137          
+    138              /* Disable the selected I2C peripheral */
+    139              __HAL_I2C_DISABLE(hi2c);
+    140          
+    141              /* Get the old register value */
+    142              tmpreg = hi2c->Instance->FLTR;
+    143          
+    144              /* Reset I2Cx DNF bit [3:0] */
+    145              tmpreg &= ~(I2C_FLTR_DNF);
+    146          
+    147              /* Set I2Cx DNF coefficient */
+    148              tmpreg |= DigitalFilter;
+    149          
+    150              /* Store the new register value */
+    151              hi2c->Instance->FLTR = tmpreg;
+    152          
+    153              __HAL_I2C_ENABLE(hi2c);
+    154          
+    155              hi2c->State = HAL_I2C_STATE_READY;
+    156          
+    157              return HAL_OK;
+    158            }
+    159            else
+    160            {
+    161              return HAL_BUSY;
+    162            }
+    163          }
+    164          
+    165          /**
+    166            * @}
+    167            */
+    168          
+    169          /**
+    170            * @}
+    171            */
+    172          #endif
+    173          
+    174          #endif /* HAL_I2C_MODULE_ENABLED */
+    175          /**
+    176            * @}
+    177            */
+    178          
+    179          /**
+    180            * @}
+    181            */
+    182          
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   HAL_I2CEx_ConfigAnalogFilter
+       4   HAL_I2CEx_ConfigDigitalFilter
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+      66  HAL_I2CEx_ConfigAnalogFilter
+      68  HAL_I2CEx_ConfigDigitalFilter
+
+ 
+ 134 bytes in section .text
+ 
+ 134 bytes of CODE memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,15 @@
+﻿#ifndef INC_STM32_TLE5012_CONFIG_H_
+#define INC_STM32_TLE5012_CONFIG_H_
+
+typedef float float32;
+
+#define TLE5012_SPI					(&hspi1)
+#define TLE5012_MOSI_GPIO_ALTERNATE	(GPIO_AF5_SPI1)
+
+#define TLE5012_MOSI_GPIO_Port		GPIOB
+#define TLE5012_MOSI_Pin			GPIO_PIN_5
+#define TLE5012_SCK_GPIO_Port		GPIOB
+#define TLE5012_SCK_Pin				GPIO_PIN_3
+
+
+#endif

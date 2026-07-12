@@ -1,0 +1,302 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V8.32.3.193/W32 for ARM         17/Jun/2025  20:55:39
+# Copyright 1999-2019 IAR Systems AB.
+#
+#    Cpu mode     =  
+#    Endian       =  little
+#    Source file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\spi.c
+#    Command line =  
+#        -f C:\Users\LIJINS~1\AppData\Local\Temp\EW1569.tmp
+#        ("D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\spi.c" -D
+#        USE_HAL_DRIVER -D STM32F401xE -lcN "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List"
+#        -o "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj"
+#        --no_unroll --no_inline --no_tbaa --no_scheduling --debug
+#        --endian=little --cpu=Cortex-M4 -e --fpu=VFPv4_sp --dlib_config
+#        "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        8.2\arm\inc\c\DLib_Config_Full.h" -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Core/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Middlewares/Third_Party/FreeRTOS/Source/portable/IAR/ARM_CM4F\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Device/ST/STM32F4xx/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM/../Drivers/CMSIS/Include\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\TinyFOC\"
+#        -I "D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\..\IMU\" -Om)
+#    Locale       =  C
+#    List file    =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\List\spi.lst
+#    Object file  =  
+#        D:\@@@@\@@@@\23
+#        SmartCar\@@@@\STM32\@@\Project+TinyFOC\EWARM\Project\Obj\spi.o
+#
+###############################################################################
+
+D:\@@@@\@@@@\23 SmartCar\@@@@\STM32\@@\Project+TinyFOC\Core\Src\spi.c
+      1          /* USER CODE BEGIN Header */
+      2          /**
+      3            ******************************************************************************
+      4            * @file    spi.c
+      5            * @brief   This file provides code for the configuration
+      6            *          of the SPI instances.
+      7            ******************************************************************************
+      8            * @attention
+      9            *
+     10            * Copyright (c) 2025 STMicroelectronics.
+     11            * All rights reserved.
+     12            *
+     13            * This software is licensed under terms that can be found in the LICENSE file
+     14            * in the root directory of this software component.
+     15            * If no LICENSE file comes with this software, it is provided AS-IS.
+     16            *
+     17            ******************************************************************************
+     18            */
+     19          /* USER CODE END Header */
+     20          /* Includes ------------------------------------------------------------------*/
+     21          #include "spi.h"
+     22          
+     23          /* USER CODE BEGIN 0 */
+     24          
+     25          /* USER CODE END 0 */
+     26          
+     27          SPI_HandleTypeDef hspi1;
+     28          SPI_HandleTypeDef hspi2;
+     29          
+     30          /* SPI1 init function */
+     31          void MX_SPI1_Init(void)
+     32          {
+     33          
+     34            /* USER CODE BEGIN SPI1_Init 0 */
+     35          
+     36            /* USER CODE END SPI1_Init 0 */
+     37          
+     38            /* USER CODE BEGIN SPI1_Init 1 */
+     39          
+     40            /* USER CODE END SPI1_Init 1 */
+     41            hspi1.Instance = SPI1;
+     42            hspi1.Init.Mode = SPI_MODE_MASTER;
+     43            hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+     44            hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
+     45            hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+     46            hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
+     47            hspi1.Init.NSS = SPI_NSS_SOFT;
+     48            hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+     49            hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+     50            hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+     51            hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+     52            hspi1.Init.CRCPolynomial = 10;
+     53            if (HAL_SPI_Init(&hspi1) != HAL_OK)
+     54            {
+     55              Error_Handler();
+     56            }
+     57            /* USER CODE BEGIN SPI1_Init 2 */
+     58          
+     59            /* USER CODE END SPI1_Init 2 */
+     60          
+     61          }
+     62          /* SPI2 init function */
+     63          void MX_SPI2_Init(void)
+     64          {
+     65          
+     66            /* USER CODE BEGIN SPI2_Init 0 */
+     67          
+     68            /* USER CODE END SPI2_Init 0 */
+     69          
+     70            /* USER CODE BEGIN SPI2_Init 1 */
+     71          
+     72            /* USER CODE END SPI2_Init 1 */
+     73            hspi2.Instance = SPI2;
+     74            hspi2.Init.Mode = SPI_MODE_MASTER;
+     75            hspi2.Init.Direction = SPI_DIRECTION_1LINE;
+     76            hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+     77            hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+     78            hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+     79            hspi2.Init.NSS = SPI_NSS_SOFT;
+     80            hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+     81            hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+     82            hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+     83            hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+     84            hspi2.Init.CRCPolynomial = 10;
+     85            if (HAL_SPI_Init(&hspi2) != HAL_OK)
+     86            {
+     87              Error_Handler();
+     88            }
+     89            /* USER CODE BEGIN SPI2_Init 2 */
+     90          
+     91            /* USER CODE END SPI2_Init 2 */
+     92          
+     93          }
+     94          
+     95          void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
+     96          {
+     97          
+     98            GPIO_InitTypeDef GPIO_InitStruct = {0};
+     99            if(spiHandle->Instance==SPI1)
+    100            {
+    101            /* USER CODE BEGIN SPI1_MspInit 0 */
+    102          
+    103            /* USER CODE END SPI1_MspInit 0 */
+    104              /* SPI1 clock enable */
+    105              __HAL_RCC_SPI1_CLK_ENABLE();
+    106          
+    107              __HAL_RCC_GPIOB_CLK_ENABLE();
+    108              /**SPI1 GPIO Configuration
+    109              PB3     ------> SPI1_SCK
+    110              PB4     ------> SPI1_MISO
+    111              PB5     ------> SPI1_MOSI
+    112              */
+    113              GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+    114              GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    115              GPIO_InitStruct.Pull = GPIO_NOPULL;
+    116              GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    117              GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
+    118              HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    119          
+    120            /* USER CODE BEGIN SPI1_MspInit 1 */
+    121          
+    122            /* USER CODE END SPI1_MspInit 1 */
+    123            }
+    124            else if(spiHandle->Instance==SPI2)
+    125            {
+    126            /* USER CODE BEGIN SPI2_MspInit 0 */
+    127          
+    128            /* USER CODE END SPI2_MspInit 0 */
+    129              /* SPI2 clock enable */
+    130              __HAL_RCC_SPI2_CLK_ENABLE();
+    131          
+    132              __HAL_RCC_GPIOB_CLK_ENABLE();
+    133              /**SPI2 GPIO Configuration
+    134              PB13     ------> SPI2_SCK
+    135              PB15     ------> SPI2_MOSI
+    136              */
+    137              GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_15;
+    138              GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    139              GPIO_InitStruct.Pull = GPIO_NOPULL;
+    140              GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    141              GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+    142              HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    143          
+    144            /* USER CODE BEGIN SPI2_MspInit 1 */
+    145          
+    146            /* USER CODE END SPI2_MspInit 1 */
+    147            }
+    148          }
+    149          
+    150          void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
+    151          {
+    152          
+    153            if(spiHandle->Instance==SPI1)
+    154            {
+    155            /* USER CODE BEGIN SPI1_MspDeInit 0 */
+    156          
+    157            /* USER CODE END SPI1_MspDeInit 0 */
+    158              /* Peripheral clock disable */
+    159              __HAL_RCC_SPI1_CLK_DISABLE();
+    160          
+    161              /**SPI1 GPIO Configuration
+    162              PB3     ------> SPI1_SCK
+    163              PB4     ------> SPI1_MISO
+    164              PB5     ------> SPI1_MOSI
+    165              */
+    166              HAL_GPIO_DeInit(GPIOB, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5);
+    167          
+    168            /* USER CODE BEGIN SPI1_MspDeInit 1 */
+    169          
+    170            /* USER CODE END SPI1_MspDeInit 1 */
+    171            }
+    172            else if(spiHandle->Instance==SPI2)
+    173            {
+    174            /* USER CODE BEGIN SPI2_MspDeInit 0 */
+    175          
+    176            /* USER CODE END SPI2_MspDeInit 0 */
+    177              /* Peripheral clock disable */
+    178              __HAL_RCC_SPI2_CLK_DISABLE();
+    179          
+    180              /**SPI2 GPIO Configuration
+    181              PB13     ------> SPI2_SCK
+    182              PB15     ------> SPI2_MOSI
+    183              */
+    184              HAL_GPIO_DeInit(GPIOB, GPIO_PIN_13|GPIO_PIN_15);
+    185          
+    186            /* USER CODE BEGIN SPI2_MspDeInit 1 */
+    187          
+    188            /* USER CODE END SPI2_MspDeInit 1 */
+    189            }
+    190          }
+    191          
+    192          /* USER CODE BEGIN 1 */
+    193          uint8_t SPI2_ReadWriteByte(uint8_t TxData)
+    194          {
+    195          	uint8_t Rxdata;
+    196          	HAL_SPI_TransmitReceive(&hspi2,&TxData,&Rxdata,1, 1000);       
+    197          	return Rxdata;
+    198          }
+    199          /* USER CODE END 1 */
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       0   HAL_SPI_MspDeInit
+         0   -> HAL_GPIO_DeInit
+      32   HAL_SPI_MspInit
+        32   -> HAL_GPIO_Init
+        32   -> __aeabi_memclr4
+       8   MX_SPI1_Init
+         0   -> Error_Handler
+         8   -> HAL_SPI_Init
+       8   MX_SPI2_Init
+         0   -> Error_Handler
+         8   -> HAL_SPI_Init
+      16   SPI2_ReadWriteByte
+        16   -> HAL_SPI_TransmitReceive
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable5
+       4  ??DataTable5_1
+       4  ??DataTable5_2
+       4  ??DataTable5_3
+       4  ??DataTable5_4
+       4  ??DataTable5_5
+       4  ??DataTable5_6
+      20  ?_0
+      54  HAL_SPI_MspDeInit
+     184  HAL_SPI_MspInit
+      72  MX_SPI1_Init
+      66  MX_SPI2_Init
+      28  SPI2_ReadWriteByte
+      88  hspi1
+      88  hspi2
+
+ 
+ 176 bytes in section .bss
+  20 bytes in section .rodata
+ 432 bytes in section .text
+ 
+ 432 bytes of CODE  memory
+  20 bytes of CONST memory
+ 176 bytes of DATA  memory
+
+Errors: none
+Warnings: none
