@@ -1,3 +1,8 @@
+/*****************************************************************************
+程序名称：有刷电机控制
+程 序 员：李锦上 Email：lijinshang@126.com
+功能描述：提供有刷电机PWM控制、TLE5012B角度传感器读取及速度滤波功能
+******************************************************************************/
 #include "BrushedMotor.h"
 #include <string.h>
 
@@ -110,11 +115,6 @@ void BrushedMotor_Start(BrushedMotor_t *motor)
 	motor->enabled = 1;
 }
 
-/******************************************************************************
-函数：配置一阶滤波器参数
-参数：*param：滤波器结构体, cutoff_freq：截止频率, sample_freq：采样频率
-返回：无
-******************************************************************************/
 void filter_coefficient_config(Filter_Structure_t *param, float cutoff_freq, float sample_freq)
 {
 	memset(param, 0, sizeof(Filter_Structure_t));

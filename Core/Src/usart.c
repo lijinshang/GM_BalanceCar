@@ -368,26 +368,26 @@ void UsartReceive_IDLE(UART_HandleTypeDef *huart)
 
 uint8_t calc_crc8_checksum(uint8_t *buf, uint8_t len)
 {
-    uint8_t crc = 0x00;
-    uint8_t i, j;
-    
-    for(i=0; i<len; i++)
-    {
-        crc ^= buf[i];
-        for(j=0; j<8; j++)
-        {
-            if(crc & 0x80)
-            {
-                crc = (crc << 1) ^ 0x07;
-            }
-            else
-            {
-                crc <<= 1;
-            }
-        }
-    }
-    
-    return crc;
+	uint8_t crc = 0x00;
+	uint8_t i, j;
+	
+	for(i=0; i<len; i++)
+	{
+		crc ^= buf[i];
+		for(j=0; j<8; j++)
+		{
+			if(crc & 0x80)
+			{
+				crc = (crc << 1) ^ 0x07;
+			}
+			else
+			{
+				crc <<= 1;
+			}
+		}
+	}
+	
+	return crc;
 }
 
 void IMU_ParseFrame(uint8_t *buf, uint16_t len)

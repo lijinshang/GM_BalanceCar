@@ -1,15 +1,11 @@
+/*****************************************************************************
+程序名称：电池监控
+程 序 员：李锦上 Email：lijinshang@126.com
+功能描述：电池电量监控模块，支持多串电池、多级电量阈值及滞回比较
+******************************************************************************/
 #include "battery_monitor.h"
 #include <stdio.h>
 
-/******************************************************************************
-函数：BatteryMonitor_Init
-参数：
-  monitor - 电池监控器实例指针
-  cell_count - 电池串数（1~MAX_CELL_COUNT）
-  level_count - 电量挡位数（2~MAX_LEVEL_COUNT）
-  hysteresis - 滞回电压（V）
-返回：0-成功，-1-失败
-******************************************************************************/
 int8_t BatteryMonitor_Init(BatteryMonitor *monitor, uint8_t cell_count, uint8_t level_count, float hysteresis)
 {
 	if (monitor == NULL || cell_count < 1 || cell_count > MAX_CELL_COUNT ||
